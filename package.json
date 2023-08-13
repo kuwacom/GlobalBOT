@@ -1,0 +1,18 @@
+{
+  "name": "discord.js-typescript-template",
+  "version": "3.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsc && node ./dist/index.js",
+    "build": "tsc",
+    "start": "node ./dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.11.0",
+    "tslog": "^4.8.1"
+  }
+}
