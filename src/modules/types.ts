@@ -1,5 +1,4 @@
 import Discord from "discord.js";
-import DiscordVoice from "@discordjs/voice";
 import { config } from "../bot";
 
 export const embedCollar = {
@@ -53,3 +52,43 @@ export interface Modal {
     },
     executeInteraction(interaction: DiscordModalSubmitInteraction): void;
 }
+
+
+export const Commands =  {
+    gban: {
+        ban: {
+            user: "/gban ban user",
+            userId: "/gban ban userid"
+        },
+        unban: {
+            user: "/gban unban user",
+            userId: "/gban unban userid"
+        }
+    }
+}
+
+
+export interface ServerDB {
+    id: string;
+    GBAN: boolean; // globalBAN の有効無効
+    GChat: boolean; // globalChat の有効無効
+}
+
+
+export interface GBANDB {
+    userId: string;
+    reason: string | null;
+    sourceUserId: string; // BANをしたユーザー
+    time: Date | null;
+}
+
+export interface GChatDB {
+    channelId: string;
+    sourceUserId: string; // GChatへ追加したユーザー
+    time: Date | null;
+}
+
+
+// export enum GBAN {
+//     Already = "already"
+// }

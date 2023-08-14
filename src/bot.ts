@@ -6,6 +6,7 @@ import { autoDeleteMessage, slashCommands, commands, buttons, selectMenus, modal
 import { Logger } from 'tslog'
 import * as Types from "./modules/types";
 import * as FormatERROR from "./format/error";
+import * as dbManager from "./modules/dbManager";
 
 const logger = new Logger();
 const client = new Discord.Client({
@@ -123,7 +124,15 @@ client.once("ready", async () => {
     debugGlobal();
     statusTask();
     // setSlashCommand();
+    dbManager.initialize();
 });
+
+client.on('guildCreate', (guild) => {
+    logger.info("Join the NEW Server: "+guild.name+" : "+guild.id);
+    
+    // const channel = g.channels.cache.find(channel => channel.type === 'GUILD_TEXT' && channel.permissionsFor(g.me).has('SEND_MESSAGES'))
+    // channel.send("Thank you for inviting me!")
+})
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot || !message.member || !message.guild || !message.content.split(" ")[0].startsWith(config.prefix)) return;
