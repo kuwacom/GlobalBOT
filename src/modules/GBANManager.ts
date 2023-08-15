@@ -3,11 +3,11 @@ import { logger, config, client } from "../bot";
 import * as Types from "./types";
 import * as dbManager from "./dbManager";
 
-export const init = (guildId: string) => {
+export const init = async (guildId: string) => {
+    const guild = await client.guilds.fetch(guildId);
     Object.keys(dbManager.GBANDBs).forEach(async(userId) => {
         const GBANDB = dbManager.getGBANDB(userId);
         if (!GBANDB) return;
-        const guild = await client.guilds.fetch(guildId);
 
         if (!GBANDB.reason) GBANDB.reason = "";
         guild.bans.create(userId, {
@@ -17,25 +17,27 @@ export const init = (guildId: string) => {
 }
 
 
-export const ban = (userId: string, reason: string | null, sourceUserId: string): boolean => {
+export const ban = async (userId: string, userName: string | null = "None", reason: string | null, sourceUserId: string, guildId: string): Promise<boolean> => {
     let GBANDB = dbManager.getGBANDB(userId);
     if (GBANDB) return false;
 
     GBANDB = {
         userId: userId,
+        userName: userName ? userName : "None",
         reason: reason ? reason : null,
         sourceUserId: sourceUserId,
+        serverId: guildId,
         time: new Date()
     }
     dbManager.saveGBANDB(userId, GBANDB);
 
-    Object.keys(dbManager.serverDBs).forEach(async(serverId) => {
-        const serverDB = dbManager.getServerDB(serverId);
-        if (!serverDB || !serverDB.GBAN) return;
-        const guild = await client.guilds.fetch(serverId);
+    (await client.guilds.fetch()).forEach(async(guild) => {
+        const serverDB = dbManager.getServerDB(guild.id);
+        if (!serverDB?.GBANable) return;
 
+        const guild_ = await client.guilds.fetch(guild.id);
         if (!reason) reason = "";
-        guild.bans.create(userId, {
+        guild_.bans.create(userId, {
             reason: reason
         });
     });
@@ -43,18 +45,18 @@ export const ban = (userId: string, reason: string | null, sourceUserId: string)
 }
 
 
-export const unBan = (userId: string): boolean => {
+export const unBan = async (userId: string): Promise<boolean> => {
     let GBANDB = dbManager.getGBANDB(userId);
     if (!GBANDB) return false;
 
     dbManager.removeGBANDB(userId);
     
-    Object.keys(dbManager.serverDBs).forEach(async(serverId) => {
-        const serverDB = dbManager.getServerDB(serverId);
-        if (!serverDB || !serverDB.GBAN) return;
-        const guild = await client.guilds.fetch(serverId);
-
-        guild.bans.remove(userId);
+    (await client.guilds.fetch()).forEach(async(guild) => {
+        const serverDB = dbManager.getServerDB(guild.id);
+        if (!serverDB?.GBANable) return;
+        
+        const guild_ = await client.guilds.fetch(guild.id);
+        guild_.bans.remove(userId);
     });
     return true;
 }

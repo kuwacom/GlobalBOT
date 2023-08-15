@@ -1,3 +1,4 @@
+import { client } from "../bot";
 import * as Types from "./types";
 import Discord from "discord.js";
 
@@ -72,4 +73,34 @@ export const bitParser = (size: number) => {
     }
     const res = target !== null?Math.floor((size / target) * 100) / 100 : size;
     return res + unit;
+}
+
+export const cacheUpdate = async () => {
+    return {
+        guilds: await client.guilds.fetch(),
+    }
+}
+
+export const getMember = async (userId: string): Promise<Discord.GuildMember | null> => { // 事前に fetch を実行してからやること
+    // for (const [key, guild] of (await client.guilds.fetch())) {
+    //     const guild_ = await client.guilds.fetch(guild.id);
+    //     try {
+    //         const member = await guild_.members.fetch(userId);
+    //         if (member) return member;
+    //     } catch {
+    //         console.log(guild_.name)
+    //         continue;
+    //     }
+    // }
+
+    for (const [key, guild] of (client.guilds.cache)) {
+        try {
+            const member = guild.members.fetch(userId);
+            if (member) return member;
+        } catch {
+            console.log(guild.name)
+            continue;
+        }
+    }
+    return null;
 }

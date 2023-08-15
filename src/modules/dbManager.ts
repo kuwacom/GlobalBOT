@@ -63,12 +63,13 @@ export const initialize = async(): Promise<void> => {
 export const getServerDB = (guildId: string): Types.ServerDB => {
     if (!serverDBs[guildId]) serverDBs[guildId] = {
         id: guildId,
-        GBAN: true, 
-        GChat: false
+        GBANable: true,
+        GChatable: false
     };
     return serverDBs[guildId];
 }
-export const saveServerDB = async(guildId: string): Promise<void> => {
+export const saveServerDB = async(guildId: string, serverDB: Types.ServerDB | undefined = undefined): Promise<void> => {
+    if (serverDB) serverDBs[guildId] = serverDB;
     fs.writeFile(config.path.serverDB+ "/" + guildId + ".json", JSON.stringify(serverDBs[guildId]), async (error) => {
         if (error) logger.error("[dbManager.saveServerDB] :" + error);
         logger.debug("DONE Save ServerDB " + guildId);

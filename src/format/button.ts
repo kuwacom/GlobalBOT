@@ -32,3 +32,42 @@ export const HelpNext = (num: number = 0, disabled: boolean = false): Discord.Bu
     .setStyle(Discord.ButtonStyle.Secondary)
     .setDisabled(disabled)
 }
+
+
+export const GBANBack = (num: number = 0, disabled: boolean = false): Discord.ButtonBuilder => {
+    return new Discord.ButtonBuilder()
+    .setCustomId(`GBANBack:${num}`)
+    .setLabel("<-")
+    // .setEmoji()
+    .setStyle(Discord.ButtonStyle.Secondary)
+    .setDisabled(disabled)
+}
+
+export const GBANNext = (num: number = 0, disabled: boolean = false): Discord.ButtonBuilder => {
+    return new Discord.ButtonBuilder()
+    .setCustomId(`GBANNext:${num}`)
+    .setLabel("->")
+    // .setEmoji()
+    .setStyle(Discord.ButtonStyle.Secondary)
+    .setDisabled(disabled)
+}
+
+
+
+export const GChatBack = (num: number = 0, disabled: boolean = false): Discord.ButtonBuilder => {
+    return new Discord.ButtonBuilder()
+    .setCustomId(`GChatBack:${num}`)
+    .setLabel("<-")
+    // .setEmoji()
+    .setStyle(Discord.ButtonStyle.Secondary)
+    .setDisabled(disabled)
+}
+
+export const GChatNext = (num: number = 0, disabled: boolean = false): Discord.ButtonBuilder => {
+    return new Discord.ButtonBuilder()
+    .setCustomId(`GChatNext:${num}`)
+    .setLabel("->")
+    // .setEmoji()
+    .setStyle(Discord.ButtonStyle.Secondary)
+    .setDisabled(disabled)
+}

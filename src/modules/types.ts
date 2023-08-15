@@ -64,28 +64,38 @@ export const Commands =  {
             user: "/gban unban user",
             userId: "/gban unban userid"
         }
+    },
+    gchat: {
+        link: "/gchat link",
+        unlink: "/gchat link"
+    },
+    config: {
+        GBANable: "/config gban-switch",
+        GChatable: "/config gchat-switch"
     }
 }
 
 
 export interface ServerDB {
     id: string;
-    GBAN: boolean; // globalBAN の有効無効
-    GChat: boolean; // globalChat の有効無効
+    GBANable: boolean; // globalBAN の有効無効
+    GChatable: boolean; // globalChat の有効無効
 }
 
 
 export interface GBANDB {
     userId: string;
+    userName: string | null;
     reason: string | null;
     sourceUserId: string; // BANをしたユーザー
-    time: Date | null;
+    serverId: string; // BANされたサーバー
+    time: Date;
 }
 
 export interface GChatDB {
     channelId: string;
     sourceUserId: string; // GChatへ追加したユーザー
-    time: Date | null;
+    time: Date;
 }
 
 

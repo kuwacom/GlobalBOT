@@ -2,9 +2,11 @@ import Discord from "discord.js";
 // @ts-ignore
 import config from "../config.json";
 import fs from "fs";
-import { autoDeleteMessage, slashCommands, commands, buttons, selectMenus, modals, sleep, sec2HHMMSS, randRange } from "./modules/utiles"
+import { autoDeleteMessage, slashCommands, commands, buttons, selectMenus, modals, sleep, sec2HHMMSS, randRange, cacheUpdate } from "./modules/utiles"
 import { Logger } from 'tslog'
 import * as Types from "./modules/types";
+import * as GBANManager from "./modules/GBANManager";
+import * as GChatManager from "./modules/GChatManager";
 import * as FormatERROR from "./format/error";
 import * as dbManager from "./modules/dbManager";
 
@@ -96,6 +98,13 @@ async function statusTask() {
     }
 }
 
+async function cacheUpdateTask() {
+    while (1) {
+        cacheUpdate();
+        await sleep(config.cacheUpdateInterval * 1000 * 60);
+    }
+}
+
 async function setSlashCommand() {
     // client.guilds.cache.forEach(async guild => {
     //     try{//すべてのサーバーのスラコマ設定 グローバルコマンドと違ってすぐに反映可能だが推奨ではない
@@ -123,19 +132,28 @@ client.on("ready", async() => {
 client.once("ready", async () => {
     debugGlobal();
     statusTask();
+    cacheUpdateTask();
     // setSlashCommand();
     dbManager.initialize();
 });
 
-client.on('guildCreate', (guild) => {
+client.on('guildCreate', async (guild) => {
     logger.info("Join the NEW Server: "+guild.name+" : "+guild.id);
     
+    GBANManager.init(guild.id);
     // const channel = g.channels.cache.find(channel => channel.type === 'GUILD_TEXT' && channel.permissionsFor(g.me).has('SEND_MESSAGES'))
     // channel.send("Thank you for inviting me!")
 })
 
 client.on("messageCreate", async (message) => {
-    if (message.author.bot || !message.member || !message.guild || !message.content.split(" ")[0].startsWith(config.prefix)) return;
+    if (message.author.bot || !message.member || !message.guild) return;
+    if (!message.content.split(" ")[0].startsWith(config.prefix)) { // 通常メッセージ
+        // GChat
+        const serverDB = dbManager.getServerDB(message.guild.id);
+        if (serverDB.GChatable && message.channel.id in dbManager.GChatDBs) GChatManager.broadcastMessage(message);
+
+        return;
+    }
     const [cmd, ...args] = message.content.slice(config.prefix.length).replace("　", " ").split(" ").filter(v => v != "");
 
     // Object.keys(commands).forEach((commandName) => {

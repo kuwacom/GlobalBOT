@@ -1,21 +1,32 @@
 {
 	"token": "",
-	"prefix": "!!t",
+	"prefix": ".g",
     "commands": {
-        "help":["help"]
+        "help":["help", "h"]
+    },
+    "pageSlice": {
+        "GBANList": 4,
+        "GChatList": 6
     },
     "emoji": {
         "help": "❔",
         "warning": "⚠️",
-        "error": "❌"
+        "error": "❌",
+        "check": "✔"
     },
     "embed": {
-        "footerText": "v1.0",
+        "footerText": "v1.1 Create BY kuwa.app",
         "colors": {
             "info": "#87ceeb",
             "success": "#00fa9a",
             "warning": "#ffa500",
             "error": "#ff0000"
         }
-    }
+    },
+    "path": {
+        "serverDB": "./serverDB",
+        "GBANDB":"./GBANDB",
+        "GChatDB":"./GChatDB"
+    },
+    "cacheUpdateInterval": 1
 }
