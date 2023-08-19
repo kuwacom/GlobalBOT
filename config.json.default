@@ -15,7 +15,7 @@
         "check": "✔"
     },
     "embed": {
-        "footerText": "v1.1 Create BY kuwa.app",
+        "footerText": "v2.0 Create BY kuwa.app",
         "colors": {
             "info": "#87ceeb",
             "success": "#00fa9a",

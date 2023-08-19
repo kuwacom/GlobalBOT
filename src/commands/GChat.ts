@@ -1,7 +1,8 @@
 import { logger, config, client } from "../bot";
-import { sleep, getMember, cacheUpdate } from "../modules/utiles";
+import { sleep, getMember, cacheUpdate, GChatConfRoleCheck } from "../modules/utiles";
 import * as GChatManager from "../modules/GChatManager";
 import * as FormatButton from "../format/button";
+import * as FormatERROR from "../format/error";
 import * as Types from "../modules/types";
 import * as dbManager from "../modules/dbManager";
 import Discord from "discord.js";
@@ -60,6 +61,14 @@ export const executeMessage = async (message: Discord.Message) => {
 export const executeInteraction = async (interaction: Types.DiscordCommandInteraction) => {
     if (!interaction.guild || !interaction.channel || !interaction.member || !interaction.isChatInputCommand()) return;
     // interactionCommand
+
+    // 権限チェック
+    const member = await interaction.guild.members.fetch(interaction.user.id);
+    if (interaction.user.id != interaction.guild.ownerId && !GChatConfRoleCheck(member.roles)) {
+        interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.editable));
+        return;
+    }
+
     const subCommand = interaction.options.getSubcommand();
     if (subCommand == "list") {
 
@@ -74,7 +83,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             if (channel?.type != Discord.ChannelType.GuildText) return; // これがないと型エラー
 
             const serverDB = dbManager.getServerDB(channel.guild.id);
-            if (!serverDB.GChatable) return;
+            if (!serverDB.GChat.enabled) return;
 
             const LinkDate = new Date(GChatDB.time);
             const LinkedUser = (await getMember(GChatDB.sourceUserId))?.user.username
@@ -120,7 +129,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         const result = GChatManager.linkGchat(channel.id, interaction.user.id);
         if (!result) {
             const embed = new Discord.EmbedBuilder()
-            .setColor(Types.embedCollar.error)
+            .setColor(Types.embedCollar.warning)
             .setTitle(config.emoji.warning + 'すでに接続されています')
             .setDescription(
                 'このチャンネルはすでにグローバルチャットへ接続されています\n\n'+
@@ -130,13 +139,13 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
     
             interaction.reply({
                 embeds: [ embed ],
-                ephemeral: false
+                ephemeral: true
             });
             return;
         }
 
         const serverDB = dbManager.getServerDB(interaction.guild.id);
-        serverDB.GChatable = true;
+        serverDB.GChat.enabled = true;
         dbManager.saveServerDB(interaction.guild.id);
 
         const embed = new Discord.EmbedBuilder()
@@ -151,17 +160,17 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
 
         interaction.reply({
             embeds: [ embed ],
-            ephemeral: true
+            ephemeral: false
         });
         return;
     } else if (subCommand == "unlink") {
         const channel = interaction.options.getChannel("channel") ? interaction.options.getChannel("channel") : interaction.channel;
         if (channel?.type != Discord.ChannelType.GuildText) return;
 
-        const result = GChatManager.linkGchat(channel.id, interaction.user.id);
+        const result = GChatManager.unLinkGchat(channel.id);
         if (!result) {
             const embed = new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.error)
+                .setColor(Types.embedCollar.warning)
                 .setTitle(config.emoji.warning + '接続されていません')
                 .setDescription(
                     'このチャンネルはすでにグローバルチャットへ接続されていないチャンネルです\n\n'+
@@ -171,13 +180,13 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
     
             interaction.reply({
                 embeds: [ embed ],
-                ephemeral: false
+                ephemeral: true
             });
             return;
         }
 
         const serverDB = dbManager.getServerDB(interaction.guild.id);
-        serverDB.GChatable = false;
+        serverDB.GChat.enabled = false;
         dbManager.saveServerDB(interaction.guild.id);
 
         const embed = new Discord.EmbedBuilder()
@@ -192,7 +201,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
 
         interaction.reply({
             embeds: [ embed ],
-            ephemeral: true
+            ephemeral: false
         });
         return;
     }

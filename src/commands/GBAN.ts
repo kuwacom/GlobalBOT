@@ -1,6 +1,7 @@
 import { logger, config, client } from "../bot";
-import { sleep, getMember, cacheUpdate } from "../modules/utiles";
+import { sleep, getMember, cacheUpdate, GBANConfRoleCheck } from "../modules/utiles";
 import * as GBANManager from "../modules/GBANManager";
+import * as FormatERROR from "../format/error";
 import * as FormatButton from "../format/button";
 import * as Types from "../modules/types";
 import * as dbManager from "../modules/dbManager";
@@ -109,6 +110,14 @@ export const executeMessage = async (message: Discord.Message) => {
 export const executeInteraction = async (interaction: Types.DiscordCommandInteraction) => {
     if (!interaction.guild || !interaction.channel || !interaction.member || !interaction.isChatInputCommand()) return;
     // interactionCommand
+
+    // 権限チェック
+    const member = await interaction.guild.members.fetch(interaction.user.id);
+    if (interaction.user.id != interaction.guild.ownerId && !GBANConfRoleCheck(member.roles)) {
+        interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.editable));
+        return;
+    }
+
     const subcommandGroup = interaction.options.getSubcommandGroup();
     const subCommand = interaction.options.getSubcommand();
     if (subCommand == "list") {
@@ -173,7 +182,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
 
         interaction.reply({
             embeds: [ embed ],
-            ephemeral: true
+            ephemeral: false
         });
         return;
     }
@@ -188,7 +197,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const result = await GBANManager.ban(user.id, user.username, reason, interaction.user.id, interaction.guild.id);
             if (!result) {
                 const embed = new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.error)
+                .setColor(Types.embedCollar.warning)
                 .setTitle(config.emoji.warning + 'すでにBANされています')
                 .setDescription(
                     'このユーザーはすでにグローバルBANされています\n\n'+
@@ -198,7 +207,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         
                 interaction.reply({
                     embeds: [ embed ],
-                    ephemeral: false
+                    ephemeral: true
                 });
                 return;
             }
@@ -227,7 +236,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const result = await GBANManager.ban(userId, null, reason, interaction.user.id, interaction.guild.id);
             if (!result) {
                 const embed = new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.error)
+                .setColor(Types.embedCollar.warning)
                 .setTitle(config.emoji.warning + 'すでにBANされています')
                 .setDescription(
                     'このユーザーはすでにグローバルBANされています\n\n'+
@@ -237,7 +246,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         
                 interaction.reply({
                     embeds: [ embed ],
-                    ephemeral: false
+                    ephemeral: true
                 });
                 return;
             }
@@ -267,7 +276,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const result = await GBANManager.unBan(user.id);
             if (!result) {
                 const embed = new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.error)
+                .setColor(Types.embedCollar.warning)
                 .setTitle(config.emoji.warning + 'BANされていないユーザーです')
                 .setDescription(
                     'このユーザーはグローバルBANされていません\n\n'+
@@ -277,7 +286,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         
                 interaction.reply({
                     embeds: [ embed ],
-                    ephemeral: false
+                    ephemeral: true
                 });
                 return;
             }
@@ -305,7 +314,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const result = await GBANManager.unBan(userId);
             if (!result) {
                 const embed = new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.error)
+                .setColor(Types.embedCollar.warning)
                 .setTitle(config.emoji.warning + 'BANされていないユーザーです')
                 .setDescription(
                     'このユーザーはグローバルBANされていません\n\n'+
@@ -315,7 +324,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         
                 interaction.reply({
                     embeds: [ embed ],
-                    ephemeral: false
+                    ephemeral: true
                 });
                 return;
             }

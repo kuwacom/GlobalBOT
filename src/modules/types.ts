@@ -70,16 +70,34 @@ export const Commands =  {
         unlink: "/gchat link"
     },
     config: {
-        GBANable: "/config gban-switch",
-        GChatable: "/config gchat-switch"
+        editable: "/config-editable",
+        // GBANable: "/config gban-switch",
+        // GChatable: "/config gchat-switch"
+        gban: {
+            editable: "/gban-editable",
+            enabled: "/config gban enabled",
+        },
+        gchat: {
+            editable: "/gchat-editable",
+            enabled: "/config gchat enabled",
+        }
     }
 }
 
 
 export interface ServerDB {
     id: string;
-    GBANable: boolean; // globalBAN の有効無効
-    GChatable: boolean; // globalChat の有効無効
+    editableRoles: string[] | null;
+    // GBANable: boolean; // globalBAN の有効無効
+    // GChatable: boolean; // globalChat の有効無効
+    GBAN: {
+        enabled: boolean;
+        editableRoles: string[] | null;
+    };
+    GChat: {
+        enabled: boolean;
+        editableRoles: string[] | null;
+    }
 }
 
 

@@ -33,7 +33,7 @@ export const ban = async (userId: string, userName: string | null = "None", reas
 
     (await client.guilds.fetch()).forEach(async(guild) => {
         const serverDB = dbManager.getServerDB(guild.id);
-        if (!serverDB?.GBANable) return;
+        if (!serverDB?.GBAN.enabled) return;
 
         const guild_ = await client.guilds.fetch(guild.id);
         if (!reason) reason = "";
@@ -53,7 +53,7 @@ export const unBan = async (userId: string): Promise<boolean> => {
     
     (await client.guilds.fetch()).forEach(async(guild) => {
         const serverDB = dbManager.getServerDB(guild.id);
-        if (!serverDB?.GBANable) return;
+        if (!serverDB?.GBAN.enabled) return;
         
         const guild_ = await client.guilds.fetch(guild.id);
         guild_.bans.remove(userId);

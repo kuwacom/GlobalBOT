@@ -16,14 +16,63 @@ export const interaction = {
         ephemeral: true
     } as Discord.InteractionReplyOptions,
 
-    // template二個目のエラー
-    TemplateError2: (text: string): Discord.InteractionReplyOptions => {
+    // 権限足りないときエラー
+    PermissionDenied: (hintCommand: string): Discord.InteractionReplyOptions => {
         return {
             embeds: [
                 new Discord.EmbedBuilder()
                 .setColor(Types.embedCollar.error)
-                .setTitle(config.emoji.error+"エラー")
-                .setDescription(text)
+                .setTitle(config.emoji.error+"権限がありません！")
+                .setDescription(
+                    "このコマンドを実行する権限がありません！\n"+
+                    "サーバーのオーナーに設定変更を申し出てください\n\n"+
+                    `\`${hintCommand}\`より権限を設定可能です`
+                )
+                .setFooter({ text: config.embed.footerText })
+            ],
+            ephemeral: true
+        };
+    },
+    AlreadyRegisteredRole: (hintCommand: string): Discord.InteractionReplyOptions => {
+        return {
+            embeds: [
+                new Discord.EmbedBuilder()
+                .setColor(Types.embedCollar.warning)
+                .setTitle(config.emoji.warning+"すでに登録されています！")
+                .setDescription(
+                    "このロールはすでに登録済みです\n\n"+
+                    `\`${hintCommand}\`よりロールを設定可能です`
+                )
+                .setFooter({ text: config.embed.footerText })
+            ],
+            ephemeral: true
+        };
+    },
+    NotRegisteredRole: (hintCommand: string): Discord.InteractionReplyOptions => {
+        return {
+            embeds: [
+                new Discord.EmbedBuilder()
+                .setColor(Types.embedCollar.warning)
+                .setTitle(config.emoji.warning+"存在しないロールです！")
+                .setDescription(
+                    "このロールは登録されていません\n\n"+
+                    `\`${hintCommand}\`よりロールを設定可能です`
+                )
+                .setFooter({ text: config.embed.footerText })
+            ],
+            ephemeral: true
+        };
+    },
+    NotRegisteredRoles: (hintCommand: string): Discord.InteractionReplyOptions => {
+        return {
+            embeds: [
+                new Discord.EmbedBuilder()
+                .setColor(Types.embedCollar.warning)
+                .setTitle(config.emoji.warning+"ロールがありません！")
+                .setDescription(
+                    "ロールの設定がされていません！\n\n"+
+                    `\`${hintCommand}\`よりロールを設定可能です`
+                )
                 .setFooter({ text: config.embed.footerText })
             ],
             ephemeral: true

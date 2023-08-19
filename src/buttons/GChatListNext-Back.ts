@@ -26,7 +26,7 @@ export const executeInteraction = async (interaction: Types.DiscordButtonInterac
         if (channel?.type != Discord.ChannelType.GuildText) return; // これがないと型エラー
 
         const serverDB = dbManager.getServerDB(channel.guild.id);
-        if (!serverDB.GChatable) return;
+        if (!serverDB.GChat.enabled) return;
 
         const LinkDate = new Date(GChatDB.time);
         const LinkedUser = (await getMember(GChatDB.sourceUserId))?.user.username

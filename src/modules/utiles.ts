@@ -1,4 +1,6 @@
 import { client } from "../bot";
+import { executeInteraction } from "../buttons/GBANListNext-Back";
+import * as dbManager from "./dbManager";
 import * as Types from "./types";
 import Discord from "discord.js";
 
@@ -103,4 +105,22 @@ export const getMember = async (userId: string): Promise<Discord.GuildMember | n
         }
     }
     return null;
+}
+
+export const serverConfRoleCheck = (roles: Discord.GuildMemberRoleManager): boolean => {
+    const serverDB = dbManager.getServerDB(roles.guild.id);
+    if (!serverDB.editableRoles) return false;
+    return serverDB.editableRoles.some(roleId => roles.cache.some(role => roleId == role.id));
+}
+
+export const GBANConfRoleCheck = (roles: Discord.GuildMemberRoleManager): boolean => {
+    const serverDB = dbManager.getServerDB(roles.guild.id);
+    if (!serverDB.GBAN.editableRoles) return false;
+    return serverDB.GBAN.editableRoles.some(roleId => roles.cache.some(role => roleId == role.id));
+}
+
+export const GChatConfRoleCheck = (roles: Discord.GuildMemberRoleManager): boolean => {
+    const serverDB = dbManager.getServerDB(roles.guild.id);
+    if (!serverDB.GChat.editableRoles) return false;
+    return serverDB.GChat.editableRoles.some(roleId => roles.cache.some(role => roleId == role.id));
 }

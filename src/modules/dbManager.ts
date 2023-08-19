@@ -63,8 +63,15 @@ export const initialize = async(): Promise<void> => {
 export const getServerDB = (guildId: string): Types.ServerDB => {
     if (!serverDBs[guildId]) serverDBs[guildId] = {
         id: guildId,
-        GBANable: true,
-        GChatable: false
+        editableRoles: null,
+        GBAN: {
+            enabled: true,
+            editableRoles: null
+        },
+        GChat: {
+            enabled: false,
+            editableRoles: null
+        }
     };
     return serverDBs[guildId];
 }

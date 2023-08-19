@@ -29,7 +29,7 @@ export const broadcastMessage = async (message: Discord.Message) => {
     message.delete();
     client.guilds.cache.forEach((guild) => {
         const serverDB = dbManager.getServerDB(guild.id);
-        if (!serverDB.GChatable) return;
+        if (!serverDB.GChat.enabled) return;
         guild.channels.cache.forEach(async(channel) => {
             if (!(channel.id in dbManager.GChatDBs) || channel.type != Discord.ChannelType.GuildText) return;
             
@@ -41,8 +41,11 @@ export const broadcastMessage = async (message: Discord.Message) => {
                     name: message.author.username
                 })
                 .setDescription(message.content + "\n\n" + files.join("\n"))
-                .setFooter({ iconURL: message.guild?.iconURL() as string, text: message.guild?.name + "\n" +
-                config.embed.footerText });
+                .setFooter({
+                    iconURL: message.guild?.iconURL() as string, text: message.guild?.name + "\n" +
+                    config.embed.footerText
+                })
+                .setTimestamp(new Date());
             channel.send({
                 files: files,
                 embeds: [ embed ]
