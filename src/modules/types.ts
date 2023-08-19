@@ -79,8 +79,6 @@ export const Commands =  {
     },
     config: {
         editable: "/config-editable",
-        // GBANable: "/config gban-switch",
-        // GChatable: "/config gchat-switch"
         gban: {
             editable: "/gban-editable",
             enabled: "/config gban enabled",
@@ -123,8 +121,3 @@ export interface GChatDB {
     sourceUserId: string; // GChatへ追加したユーザー
     time: Date;
 }
-
-
-// export enum GBAN {
-//     Already = "already"
-// }

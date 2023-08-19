@@ -84,17 +84,6 @@ export const cacheUpdate = async () => {
 }
 
 export const getMember = async (userId: string): Promise<Discord.GuildMember | null> => { // 事前に fetch を実行してからやること
-    // for (const [key, guild] of (await client.guilds.fetch())) {
-    //     const guild_ = await client.guilds.fetch(guild.id);
-    //     try {
-    //         const member = await guild_.members.fetch(userId);
-    //         if (member) return member;
-    //     } catch {
-    //         console.log(guild_.name)
-    //         continue;
-    //     }
-    // }
-
     for (const [key, guild] of (client.guilds.cache)) {
         try {
             const member = guild.members.fetch(userId);
