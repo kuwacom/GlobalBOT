@@ -4,6 +4,10 @@ import fs from "fs";
 import path from "path";
 import { config, logger } from "../bot";
 
+// @ts-ignore
+import botDB from "../../botDB.json";
+export { botDB };
+
 export const serverDBs: { [serverId: string]: Types.ServerDB} = {};
 export const GBANDBs: { [userId: string]: Types.GBANDB} = {};
 export const GChatDBs: { [channelId: string]: Types.GChatDB} = {};
@@ -58,6 +62,15 @@ export const initialize = async(): Promise<void> => {
     });
 }
 
+
+
+export const saveBotDB = (): boolean => {
+    fs.writeFile("../../botDB.json", JSON.stringify(botDB), async (error) => {
+        if (error) logger.error("[dbManager.saveBotDB] :" + error);
+        logger.debug("DONE Save botDB");
+    });
+    return true;
+}
 
 
 export const getServerDB = (guildId: string): Types.ServerDB => {

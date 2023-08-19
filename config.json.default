@@ -1,5 +1,6 @@
 {
 	"token": "",
+    "adminIds": [""],
 	"prefix": ".g",
     "commands": {
         "help":["help", "h"]

@@ -114,7 +114,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
     // 権限チェック
     const member = await interaction.guild.members.fetch(interaction.user.id);
     if (interaction.user.id != interaction.guild.ownerId && !GBANConfRoleCheck(member.roles)) {
-        interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.editable));
+        interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.gban.editable));
         return;
     }
 

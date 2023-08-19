@@ -133,7 +133,7 @@ client.once("ready", async () => {
     debugGlobal();
     statusTask();
     cacheUpdateTask();
-    // setSlashCommand();
+    setSlashCommand();
     dbManager.initialize();
 });
 
@@ -150,7 +150,9 @@ client.on("messageCreate", async (message) => {
     if (!message.content.split(" ")[0].startsWith(config.prefix)) { // 通常メッセージ
         // GChat
         const serverDB = dbManager.getServerDB(message.guild.id);
-        if (serverDB.GChat.enabled && message.channel.id in dbManager.GChatDBs) GChatManager.broadcastMessage(message);
+        if (serverDB.GChat.enabled && message.channel.id in dbManager.GChatDBs &&
+            !dbManager.botDB.GChatBAN.users.includes(message.author.id) &&
+            !dbManager.botDB.GChatBAN.servers.includes(message.guild.id)) GChatManager.broadcastMessage(message);
 
         return;
     }

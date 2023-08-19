@@ -2,6 +2,7 @@ import { logger, config, client } from "../bot";
 import { sleep, getMember, cacheUpdate, GChatConfRoleCheck } from "../modules/utiles";
 import * as GChatManager from "../modules/GChatManager";
 import * as FormatButton from "../format/button";
+import * as FormatEmbed from "../format/embed";
 import * as FormatERROR from "../format/error";
 import * as Types from "../modules/types";
 import * as dbManager from "../modules/dbManager";
@@ -47,6 +48,88 @@ export const command = {
                     ]
                 }
             ]
+        },
+        {
+            name: "banuser",
+            description: "指定したユーザーをグローバルチャットからBANします",
+            type: 1,
+            options: [
+                {
+                    name: "id",
+                    description: "BANするユーザーID",
+                    required: true,
+                    type: 7,
+                    channel_type: [
+                        0, 2
+                    ]
+                }
+            ]
+        },
+        {
+            name: "ban",
+            description: "指定したユーザーおよびサーバーをグローバルチャットからBANします",
+            type: 2,
+            options: [
+                {
+                    name: "user",
+                    description: "指定したユーザーをグローバルチャットからBANします",
+                    type: 1,
+                    options: [
+                        {
+                            name: "id",
+                            description: "BANするユーザーID",
+                            required: true,
+                            type: 3
+                        }
+                    ]
+                },
+                {
+                    name: "server",
+                    description: "指定したサーバーをグローバルチャットからBANします",
+                    type: 1,
+                    options: [
+                        {
+                            name: "id",
+                            description: "BANするサーバーID",
+                            required: true,
+                            type: 3
+                        }
+                    ]
+                },
+            ]
+        },
+        {
+            name: "unban",
+            description: "指定したユーザーおよびサーバーをグローバルチャットのBANを解除します",
+            type: 2,
+            options: [
+                {
+                    name: "user",
+                    description: "指定したユーザーをグローバルチャットのBANを解除します",
+                    type: 1,
+                    options: [
+                        {
+                            name: "id",
+                            description: "解除するユーザーID",
+                            required: true,
+                            type: 3
+                        }
+                    ]
+                },
+                {
+                    name: "server",
+                    description: "指定したサーバーをグローバルチャットのBANを解除します",
+                    type: 1,
+                    options: [
+                        {
+                            name: "id",
+                            description: "解除するサーバーID",
+                            required: true,
+                            type: 3
+                        }
+                    ]
+                },
+            ]
         }
     ]
 }
@@ -65,11 +148,63 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
     // 権限チェック
     const member = await interaction.guild.members.fetch(interaction.user.id);
     if (interaction.user.id != interaction.guild.ownerId && !GChatConfRoleCheck(member.roles)) {
-        interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.editable));
+        interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.gchat.editable));
         return;
     }
 
+    const subcommandGroup = interaction.options.getSubcommandGroup();
     const subCommand = interaction.options.getSubcommand();
+
+    if (subcommandGroup == "ban") {
+        if (!config.adminIds.includes(interaction.user.id)) { // BOT運営かの権限チェック
+            interaction.reply(FormatERROR.interaction.SystemPermissionDenied());
+            return;
+        }
+        const id = interaction.options.getString("id");
+        if (!id) return;
+        if (subCommand == "user") {
+            const reset = GChatManager.banUser(id);
+            if (!reset) {
+                interaction.reply(FormatERROR.interaction.GChat.AlreadyBANedUser(Types.Commands.gchat.ban.user));
+                return;
+            }
+            interaction.reply(FormatEmbed.interaction.GChat.DoneBANUser(Types.Commands.gchat.ban.user));
+            return;
+        } else if (subCommand == "server") {
+            const reset = GChatManager.banServer(id);
+            if (!reset) {
+                interaction.reply(FormatERROR.interaction.GChat.AlreadyBANedServer(Types.Commands.gchat.ban.server));
+                return;
+            }
+            interaction.reply(FormatEmbed.interaction.GChat.DoneBANServer(Types.Commands.gchat.ban.server));
+            return;
+        }
+    } else if (subcommandGroup == "unban") {
+        if (!config.adminIds.includes(interaction.user.id)) {
+            interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.editable));
+            return;
+        }
+        const id = interaction.options.getString("id");
+        if (!id) return;
+        if (subCommand == "user") {
+            const reset = GChatManager.unbanUser(id);
+            if (!reset) {
+                interaction.reply(FormatERROR.interaction.GChat.NotBANedUser(Types.Commands.gchat.unban.user));
+                return;
+            }
+            interaction.reply(FormatEmbed.interaction.GChat.DoneUnBANUser(Types.Commands.gchat.unban.user));
+            return;
+        } else if (subCommand == "server") {
+            const reset = GChatManager.unbanServer(id);
+            if (!reset) {
+                interaction.reply(FormatERROR.interaction.GChat.NotBANedServer(Types.Commands.gchat.unban.server));
+                return;
+            }
+            interaction.reply(FormatEmbed.interaction.GChat.DoneUnBANServer(Types.Commands.gchat.unban.server));
+            return;
+        }
+    }
+
     if (subCommand == "list") {
 
         await cacheUpdate();

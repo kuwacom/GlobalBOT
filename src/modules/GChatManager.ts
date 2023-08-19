@@ -2,7 +2,34 @@ import Discord, { Attachment } from "discord.js";
 import { logger, config, client } from "../bot";
 import * as Types from "./types";
 import * as dbManager from "./dbManager";
-import { sleep } from "./utiles";
+
+export const banUser = (userId: string): boolean => {
+    if (dbManager.botDB.GChatBAN.users.includes(userId)) return false;
+    dbManager.botDB.GChatBAN.users.push(userId);
+    dbManager.saveBotDB();
+    return true;
+}
+export const banServer = (serverId: string): boolean => {
+    if (dbManager.botDB.GChatBAN.servers.includes(serverId)) return false;
+    dbManager.botDB.GChatBAN.servers.push(serverId);
+    dbManager.saveBotDB();
+    return true;
+}
+
+export const unbanUser = (userId: string): boolean => {
+    if (!dbManager.botDB.GChatBAN.users.includes(userId)) return false;
+    dbManager.botDB.GChatBAN.users = dbManager.botDB.GChatBAN.users.filter(user => user != userId);
+    dbManager.saveBotDB();
+    return true;
+}
+export const unbanServer = (serverId: string): boolean => {
+    if (!dbManager.botDB.GChatBAN.servers.includes(serverId)) return false;
+    dbManager.botDB.GChatBAN.servers = dbManager.botDB.GChatBAN.servers.filter(server => server != serverId);
+    dbManager.saveBotDB();
+    return true;
+}
+
+
 
 export const linkGchat = (channelId: string, sourceUserId: string): boolean => {
     let GChatDB = dbManager.getGChatDB(channelId);
@@ -38,7 +65,7 @@ export const broadcastMessage = async (message: Discord.Message) => {
                 .setColor(Types.embedCollar.info)
                 .setAuthor({
                     iconURL: message.author.avatarURL() as string,
-                    name: message.author.username
+                    name: message.author.username + "|" + message.author.id
                 })
                 .setDescription(message.content + "\n\n" + files.join("\n"))
                 .setFooter({

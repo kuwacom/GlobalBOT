@@ -67,7 +67,15 @@ export const Commands =  {
     },
     gchat: {
         link: "/gchat link",
-        unlink: "/gchat link"
+        unlink: "/gchat link",
+        ban: {
+            user: "/gchat ban user",
+            server: "/gchat ban server"
+        },
+        unban: {
+            user: "/gchat unban user",
+            server: "/gchat unban server"
+        }
     },
     config: {
         editable: "/config-editable",

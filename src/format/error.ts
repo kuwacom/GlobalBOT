@@ -33,6 +33,21 @@ export const interaction = {
             ephemeral: true
         };
     },
+    SystemPermissionDenied: (): Discord.InteractionReplyOptions => {
+        return {
+            embeds: [
+                new Discord.EmbedBuilder()
+                .setColor(Types.embedCollar.error)
+                .setTitle(config.emoji.error+"権限がありません！")
+                .setDescription(
+                    "このコマンドを実行する権限がありません！\n"+
+                    "このサーバーはBOT運営者のみが利用可能です"
+                )
+                .setFooter({ text: config.embed.footerText })
+            ],
+            ephemeral: true
+        };
+    },
     AlreadyRegisteredRole: (hintCommand: string): Discord.InteractionReplyOptions => {
         return {
             embeds: [
@@ -77,6 +92,71 @@ export const interaction = {
             ],
             ephemeral: true
         };
+    },
+
+
+    GChat: {
+        AlreadyBANedUser: (hintCommand: string): Discord.InteractionReplyOptions => {
+            return {
+                embeds: [
+                    new Discord.EmbedBuilder()
+                    .setColor(Types.embedCollar.warning)
+                    .setTitle(config.emoji.warning+"すでにBANされています！")
+                    .setDescription(
+                        "このユーザーはすでにBANされています！\n\n"+
+                        `\`${hintCommand}\`より設定可能です`
+                    )
+                    .setFooter({ text: config.embed.footerText })
+                ],
+                ephemeral: true
+            };
+        },
+        NotBANedUser: (hintCommand: string): Discord.InteractionReplyOptions => {
+            return {
+                embeds: [
+                    new Discord.EmbedBuilder()
+                    .setColor(Types.embedCollar.warning)
+                    .setTitle(config.emoji.warning+"BANされていないユーザーです！")
+                    .setDescription(
+                        "このユーザーはBANされていないユーザーです！\n\n"+
+                        `\`${hintCommand}\`より設定可能です`
+                    )
+                    .setFooter({ text: config.embed.footerText })
+                ],
+                ephemeral: true
+            };
+        },
+
+        AlreadyBANedServer: (hintCommand: string): Discord.InteractionReplyOptions => {
+            return {
+                embeds: [
+                    new Discord.EmbedBuilder()
+                    .setColor(Types.embedCollar.warning)
+                    .setTitle(config.emoji.warning+"すでにBANされています！")
+                    .setDescription(
+                        "このサーバーはすでにBANされています！\n\n"+
+                        `\`${hintCommand}\`より設定可能です`
+                    )
+                    .setFooter({ text: config.embed.footerText })
+                ],
+                ephemeral: true
+            };
+        },
+        NotBANedServer: (hintCommand: string): Discord.InteractionReplyOptions => {
+            return {
+                embeds: [
+                    new Discord.EmbedBuilder()
+                    .setColor(Types.embedCollar.warning)
+                    .setTitle(config.emoji.warning+"BANされていないサーバーです！")
+                    .setDescription(
+                        "このサーバーはBANされていないユーザーです！\n\n"+
+                        `\`${hintCommand}\`より設定可能です`
+                    )
+                    .setFooter({ text: config.embed.footerText })
+                ],
+                ephemeral: true
+            };
+        }
     }
 }
 
