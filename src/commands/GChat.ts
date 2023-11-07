@@ -213,8 +213,8 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         (await Promise.all(Object.keys(dbManager.GChatDBs).map(async(channelId) => {
             const GChatDB = dbManager.getGChatDB(channelId);
             if (!GChatDB) return;
-    
-            const channel = await client.channels.fetch(channelId);
+
+            const channel = await client.channels.fetch(channelId).catch((error) => logger.error("not found channel: "+channelId));
             if (channel?.type != Discord.ChannelType.GuildText) return; // これがないと型エラー
 
             const serverDB = dbManager.getServerDB(channel.guild.id);
