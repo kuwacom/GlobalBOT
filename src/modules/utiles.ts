@@ -1,4 +1,4 @@
-import { client } from "../bot";
+import { client, logger } from "../bot";
 import { executeInteraction } from "../buttons/GBANListNext-Back";
 import * as dbManager from "./dbManager";
 import * as Types from "./types";
@@ -86,7 +86,10 @@ export const cacheUpdate = async () => {
 export const getMember = async (userId: string): Promise<Discord.GuildMember | null> => { // 事前に fetch を実行してからやること
     for (const [key, guild] of (client.guilds.cache)) {
         try {
-            const member = guild.members.fetch(userId);
+            const member = guild.members.fetch(userId).catch((error) => {
+                logger.error("unknown user: "+userId);
+                return null;
+            });
             if (member) return member;
         } catch {
             console.log(guild.name)
