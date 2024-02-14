@@ -1,6 +1,7 @@
 {
-  "name": "discord.js-typescript-template",
-  "version": "3.0",
+  "name": "global-bot",
+  "version": "1.2.0",
+  "author": "kuwacom",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,8 +9,6 @@
     "build": "tsc",
     "start": "node ./dist/index.js"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.11.0",
