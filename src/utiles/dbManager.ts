@@ -82,7 +82,7 @@ namespace DBManager {
 
 
     export const saveBotDB = (): boolean => {
-        fs.writeFile("../../botDB.json", JSON.stringify(botDB), async (error) => {
+        fs.writeFile(env.path.botDB, JSON.stringify(botDB), async (error) => {
             if (error) logger.error("[DBManager.saveBotDB] :" + error);
             logger.debug("DONE Save botDB");
         });
