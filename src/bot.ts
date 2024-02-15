@@ -1,15 +1,15 @@
 import Discord from "discord.js";
-// @ts-ignore
-import config from "../config.json";
 import fs from "fs";
-import { autoDeleteMessage, slashCommands, commands, buttons, selectMenus, modals, sleep, sec2HHMMSS, randRange, cacheUpdate } from "./utiles/utiles"
-import * as Types from "./types/types";
-import * as GBANManager from "./utiles/GBANManager";
-import * as GChatManager from "./utiles/GChatManager";
-import * as FormatERROR from "./format/error";
-import * as dbManager from "./utiles/dbManager";
 import client from "./discord";
 import logger from "./utiles/logger";
+import { Button, Command, Modal, SelectMenu } from "./types/discord";
+import { buttons, commands, modals, selectMenus, slashCommands } from "./utiles/discord";
+import { autoDeleteMessage, cacheUpdate, sleep } from "./utiles/utiles";
+import env from "./config/env";
+import DBManager from "./utiles/dbManager";
+import GBANManager from "./utiles/GBANManager";
+import ErrorFormat from "./format/error";
+import GChatManager from "./utiles/GChatManager";
 
 // エラーハンドリング
 process.on("uncaughtException", (err) => {
@@ -23,7 +23,7 @@ const TSDistPath = "./dist";
     logger.info("Loading Commands...");
     const commandFiles = fs.readdirSync(TSDistPath+'/commands').filter(file => file.endsWith('.js'))
     for (const file of commandFiles) {
-        const command: Types.Command = require(`./commands/${file}`);
+        const command: Command = require(`./commands/${file}`);
         logger.info(`import Command: ${command.command.name}`);
         commands[command.command.name] = command;
         slashCommands.unshift(command.command)
@@ -33,7 +33,7 @@ const TSDistPath = "./dist";
     logger.info("Loading Interaction Buttons...");
     const buttonFiles = fs.readdirSync(TSDistPath+'/buttons').filter(file => file.endsWith('.js'))
     for (const file of buttonFiles) {
-        const button: Types.Button = require(`./buttons/${file}`);
+        const button: Button = require(`./buttons/${file}`);
         logger.info(`import Button: ${button.button.customId}`);
         buttons.push(button);
     }    
@@ -42,7 +42,7 @@ const TSDistPath = "./dist";
     logger.info("Loading Interaction SelectMenus...");
     const selectMenuFiles = fs.readdirSync(TSDistPath+'/selectMenus').filter(file => file.endsWith('.js'))
     for (const file of selectMenuFiles) {
-        const selectMenu: Types.SelectMenu = require(`./selectMenus/${file}`);
+        const selectMenu: SelectMenu = require(`./selectMenus/${file}`);
         logger.info(`import SelectMenu: ${selectMenu.selectMenu.customId}`);
         selectMenus.push(selectMenu);
     }    
@@ -51,13 +51,11 @@ const TSDistPath = "./dist";
     logger.info("Loading Interaction Modals...");
     const modalFiles = fs.readdirSync(TSDistPath+'/modals').filter(file => file.endsWith('.js'))
     for (const file of modalFiles) {
-        const modal: Types.Modal = require(`./modals/${file}`);
+        const modal: Modal = require(`./modals/${file}`);
         logger.info(`import Modal: ${modal.modal.customId}`);
         modals.push(modal);
     }    
 })();
-
-export { logger, config, client }; // bot.ts の変数共有用
 
 async function debugGlobal() { // デバッグ用の変数
     setInterval(() => {
@@ -88,7 +86,7 @@ async function statusTask() {
 async function cacheUpdateTask() {
     while (1) {
         cacheUpdate();
-        await sleep(config.cacheUpdateInterval * 1000 * 60);
+        await sleep(env.cacheUpdateInterval * 1000 * 60);
     }
 }
 
@@ -121,7 +119,7 @@ client.once("ready", async () => {
     statusTask();
     cacheUpdateTask();
     setSlashCommand();
-    dbManager.initialize();
+    DBManager.initialize();
 });
 
 client.on('guildCreate', async (guild) => {
@@ -134,31 +132,31 @@ client.on('guildCreate', async (guild) => {
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot || !message.member || !message.guild) return;
-    if (!message.content.split(" ")[0].startsWith(config.prefix)) { // 通常メッセージ
+    if (!message.content.split(" ")[0].startsWith(env.prefix)) { // 通常メッセージ
         // GChat
-        const serverDB = dbManager.getServerDB(message.guild.id);
-        if (serverDB.GChat.enabled && message.channel.id in dbManager.GChatDBs &&
-            !dbManager.botDB.GChatBAN.users.includes(message.author.id) &&
-            !dbManager.botDB.GChatBAN.servers.includes(message.guild.id)) GChatManager.broadcastMessage(message);
+        const serverDB = DBManager.getServerDB(message.guild.id);
+        if (serverDB.GChat.enabled && message.channel.id in DBManager.GChatDBs &&
+            !DBManager.botDB.GChatBAN.users.includes(message.author.id) &&
+            !DBManager.botDB.GChatBAN.servers.includes(message.guild.id)) GChatManager.broadcastMessage(message);
 
         return;
     }
-    const [cmd, ...args] = message.content.slice(config.prefix.length).replace("　", " ").split(" ").filter(v => v != "");
+    const [cmd, ...args] = message.content.slice(env.prefix.length).replace("　", " ").split(" ").filter(v => v != "");
 
     // Object.keys(commands).forEach((commandName) => {
     //     //@ts-ignore
-    //     if (cmd == commandName || config.commands[commandName]?.includes(cmd)) commands[commandName].executeMessage(message);
+    //     if (cmd == commandName || env.commands[commandName]?.includes(cmd)) commands[commandName].executeMessage(message);
     //     return;
     // });
     
     for(const commandName of Object.keys(commands)) {
         //@ts-ignore
-        if (!(cmd == commandName || config.commands[commandName]?.includes(cmd))) continue;
+        if (!(cmd == commandName || env.commands[commandName]?.includes(cmd))) continue;
         commands[commandName].executeMessage(message);
         return;
     };
 
-    autoDeleteMessage(await message.reply(FormatERROR.message.NotfoundCommand));
+    autoDeleteMessage(await message.reply(ErrorFormat.message.NotfoundCommand));
     return;
 });
 
@@ -195,4 +193,4 @@ client.on('interactionCreate', async (interaction) => {
     }
 });
 
-client.login(config.token);
+client.login(env.token);

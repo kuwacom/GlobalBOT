@@ -1,14 +1,7 @@
-import { client, logger } from "../bot";
-import { executeInteraction } from "../buttons/GBANListNext-Back";
-import * as dbManager from "./dbManager";
-import * as Types from "../types/types";
+import client from "../discord";
 import Discord from "discord.js";
-
-export const slashCommands: Types.SlashCommand[] = [];
-export const commands: { [commandName: string]: Types.Command } = {};
-export const buttons: Types.Button[] = [];
-export const selectMenus: Types.SelectMenu[] = [];
-export const modals: Types.Modal[] = [];
+import logger from "./logger";
+import DBManager from "./dbManager";
 
 export const sleep = (msec: number) => new Promise(resolve => setTimeout(resolve, msec));
 
@@ -100,19 +93,19 @@ export const getMember = async (userId: string): Promise<Discord.GuildMember | n
 }
 
 export const serverConfRoleCheck = (roles: Discord.GuildMemberRoleManager): boolean => {
-    const serverDB = dbManager.getServerDB(roles.guild.id);
+    const serverDB = DBManager.getServerDB(roles.guild.id);
     if (!serverDB.editableRoles) return false;
     return serverDB.editableRoles.some(roleId => roles.cache.some(role => roleId == role.id));
 }
 
 export const GBANConfRoleCheck = (roles: Discord.GuildMemberRoleManager): boolean => {
-    const serverDB = dbManager.getServerDB(roles.guild.id);
+    const serverDB = DBManager.getServerDB(roles.guild.id);
     if (!serverDB.GBAN.editableRoles) return false;
     return serverDB.GBAN.editableRoles.some(roleId => roles.cache.some(role => roleId == role.id));
 }
 
 export const GChatConfRoleCheck = (roles: Discord.GuildMemberRoleManager): boolean => {
-    const serverDB = dbManager.getServerDB(roles.guild.id);
+    const serverDB = DBManager.getServerDB(roles.guild.id);
     if (!serverDB.GChat.editableRoles) return false;
     return serverDB.GChat.editableRoles.some(roleId => roles.cache.some(role => roleId == role.id));
 }

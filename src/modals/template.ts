@@ -1,13 +1,12 @@
-import { logger, config, client } from "../bot";
+import { DiscordModalSubmitInteraction } from "../types/discord";
 import { sleep } from "../utiles/utiles";
-import * as Types from "../types/types";
 import Discord from "discord.js";
 
 export const modal = {
     customId: ["idone", "idsecond"]
 }
 
-export const executeInteraction = async (interaction: Types.DiscordModalSubmitInteraction) => {
+export const executeInteraction = async (interaction: DiscordModalSubmitInteraction) => {
     /**
      *  -- modalの設定方法 --
      * 

@@ -1,10 +1,12 @@
-import { logger, config, client } from "../bot";
+import { embedConfig, slashCommandsConfig } from "../config/discord";
+import env from "../config/env";
+import client from "../discord";
+import ButtonFormat from "../format/button";
+import ErrorFormat from "../format/error";
+import { DiscordCommandInteraction } from "../types/discord";
+import GBANManager from "../utiles/GBANManager";
+import DBManager from "../utiles/dbManager";
 import { sleep, getMember, cacheUpdate, GBANConfRoleCheck } from "../utiles/utiles";
-import * as GBANManager from "../utiles/GBANManager";
-import * as FormatERROR from "../format/error";
-import * as FormatButton from "../format/button";
-import * as Types from "../types/types";
-import * as dbManager from "../utiles/dbManager";
 import Discord from "discord.js";
 
 export const command = {
@@ -107,14 +109,14 @@ export const executeMessage = async (message: Discord.Message) => {
 
 }
 
-export const executeInteraction = async (interaction: Types.DiscordCommandInteraction) => {
+export const executeInteraction = async (interaction: DiscordCommandInteraction) => {
     if (!interaction.guild || !interaction.channel || !interaction.member || !interaction.isChatInputCommand()) return;
     // interactionCommand
 
     // 権限チェック
     const member = await interaction.guild.members.fetch(interaction.user.id);
     if (interaction.user.id != interaction.guild.ownerId && !GBANConfRoleCheck(member.roles)) {
-        interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.gban.editable));
+        interaction.reply(ErrorFormat.interaction.PermissionDenied(slashCommandsConfig.config.gban.editable));
         return;
     }
 
@@ -125,8 +127,8 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         // await cacheUpdate();
         
         const baseFields: Discord.APIEmbedField[] = 
-        (await Promise.all(Object.keys(dbManager.GBANDBs).map(async(userId) => {
-            const GBANDB = dbManager.getGBANDB(userId);
+        (await Promise.all(Object.keys(DBManager.GBANDBs).map(async(userId) => {
+            const GBANDB = DBManager.getGBANDB(userId);
             if (!GBANDB) return;
     
             const BANDate = new Date(GBANDB.time);
@@ -142,28 +144,28 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             };
         }))).filter(e => e) as [];
 
-        const pageSlice = config.pageSlice.GBANList; // ページごとに表示する量
+        const pageSlice = env.pageSlice.GBANList; // ページごとに表示する量
         const betweenFields = baseFields.slice(0, pageSlice);
     
         let button = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
-            .addComponents(FormatButton.GBANBack(0, true))
-            .addComponents(FormatButton.GBANNext(1));
+            .addComponents(ButtonFormat.GBANBack(0, true))
+            .addComponents(ButtonFormat.GBANNext(1));
         if (0 == Math.ceil(baseFields.length / pageSlice) - 1) {
             button = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
-                .addComponents(FormatButton.GBANBack(0, true))
-                .addComponents(FormatButton.GBANNext(1, true));
+                .addComponents(ButtonFormat.GBANBack(0, true))
+                .addComponents(ButtonFormat.GBANNext(1, true));
         }
     
         const embeds = [
             new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.info)
+                .setColor(embedConfig.colors.info)
                 .setTitle(`-- GlobaBAN List - 1/${Math.ceil(baseFields.length / pageSlice)} --`)
                 .setDescription("グローバルBANリスト")
                 .setDescription(
                     `**全 ${baseFields.length}個中  1~${pageSlice}個目**`
                 )
                 .setFields(betweenFields)
-                .setFooter({ text: config.embed.footerText })
+                .setFooter({ text: embedConfig.footerText })
         ];
         interaction.reply({ embeds: embeds, components: [ button ], ephemeral: true });
         return;
@@ -173,12 +175,12 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         GBANManager.init(interaction.guild.id);
         
         const embed = new Discord.EmbedBuilder()
-        .setColor(Types.embedCollar.success)
-        .setTitle(config.emoji.check + 'グローバルBANと同期しました！')
+        .setColor(embedConfig.colors.success)
+        .setTitle(env.emoji.check + 'グローバルBANと同期しました！')
         .setDescription(
             'グローバルBANとサーバーのBANを同期しました'
         )
-        .setFooter({ text: config.embed.footerText })
+        .setFooter({ text: embedConfig.footerText })
 
         interaction.reply({
             embeds: [ embed ],
@@ -197,13 +199,13 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const result = await GBANManager.ban(user.id, user.username, reason, interaction.user.id, interaction.guild.id);
             if (!result) {
                 const embed = new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.warning)
-                .setTitle(config.emoji.warning + 'すでにBANされています')
+                .setColor(embedConfig.colors.warning)
+                .setTitle(env.emoji.warning + 'すでにBANされています')
                 .setDescription(
                     'このユーザーはすでにグローバルBANされています\n\n'+
-                    `\`${Types.Commands.gban.unban.user}\` よりBANを解除できます`
+                    `\`${slashCommandsConfig.gban.unban.user}\` よりBANを解除できます`
                 )
-                .setFooter({ text: config.embed.footerText })
+                .setFooter({ text: embedConfig.footerText })
         
                 interaction.reply({
                     embeds: [ embed ],
@@ -213,15 +215,15 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             }
 
             const embed = new Discord.EmbedBuilder()
-            .setColor(Types.embedCollar.success)
-            .setTitle(config.emoji.check + 'グローバルBANしました！')
+            .setColor(embedConfig.colors.success)
+            .setTitle(env.emoji.check + 'グローバルBANしました！')
             .setDescription(
                 'BOTを導入している全サーバーでBANしました！\n'+
                 `BANをされた人: <@${user.id}> | \`${user.id}\`\n`+
                 `BANをした人: <@${interaction.user.id}>\n\n`+
-                `\`${Types.Commands.gban.unban.user}\` よりBANを解除できます`
+                `\`${slashCommandsConfig.gban.unban.user}\` よりBANを解除できます`
             )
-            .setFooter({ text: config.embed.footerText })
+            .setFooter({ text: embedConfig.footerText })
     
             interaction.reply({
                 embeds: [ embed ],
@@ -236,13 +238,13 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const result = await GBANManager.ban(userId, null, reason, interaction.user.id, interaction.guild.id);
             if (!result) {
                 const embed = new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.warning)
-                .setTitle(config.emoji.warning + 'すでにBANされています')
+                .setColor(embedConfig.colors.warning)
+                .setTitle(env.emoji.warning + 'すでにBANされています')
                 .setDescription(
                     'このユーザーはすでにグローバルBANされています\n\n'+
-                    `\`${Types.Commands.gban.unban.userId}\` よりBANを解除できます`
+                    `\`${slashCommandsConfig.gban.unban.userId}\` よりBANを解除できます`
                 )
-                .setFooter({ text: config.embed.footerText })
+                .setFooter({ text: embedConfig.footerText })
         
                 interaction.reply({
                     embeds: [ embed ],
@@ -252,15 +254,15 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             }
 
             const embed = new Discord.EmbedBuilder()
-            .setColor(Types.embedCollar.success)
-            .setTitle(config.emoji.check + 'グローバルBANしました！')
+            .setColor(embedConfig.colors.success)
+            .setTitle(env.emoji.check + 'グローバルBANしました！')
             .setDescription(
                 'BOTを導入している全サーバーでBANしました！\n'+
                 `BANをされた人: <@${userId}> | \`${userId}\`\n`+
                 `BANをした人: <@${interaction.user.id}>\n\n`+
-                `\`${Types.Commands.gban.unban.userId}\` よりBANを解除できます`
+                `\`${slashCommandsConfig.gban.unban.userId}\` よりBANを解除できます`
             )
-            .setFooter({ text: config.embed.footerText })
+            .setFooter({ text: embedConfig.footerText })
     
             interaction.reply({
                 embeds: [ embed ],
@@ -276,13 +278,13 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const result = await GBANManager.unBan(user.id);
             if (!result) {
                 const embed = new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.warning)
-                .setTitle(config.emoji.warning + 'BANされていないユーザーです')
+                .setColor(embedConfig.colors.warning)
+                .setTitle(env.emoji.warning + 'BANされていないユーザーです')
                 .setDescription(
                     'このユーザーはグローバルBANされていません\n\n'+
-                    `\`${Types.Commands.gban.ban.user}\` よりBANできます`
+                    `\`${slashCommandsConfig.gban.ban.user}\` よりBANできます`
                 )
-                .setFooter({ text: config.embed.footerText })
+                .setFooter({ text: embedConfig.footerText })
         
                 interaction.reply({
                     embeds: [ embed ],
@@ -292,15 +294,15 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             }
 
             const embed = new Discord.EmbedBuilder()
-            .setColor(Types.embedCollar.success)
-            .setTitle(config.emoji.check + 'グローバルBANを解除しました！')
+            .setColor(embedConfig.colors.success)
+            .setTitle(env.emoji.check + 'グローバルBANを解除しました！')
             .setDescription(
                 'BOTを導入している全サーバーでBAN解除しました！\n'+
                 `BAN解除された人: <@${user.id}> | \`${user.id}\`\n`+
                 `BAN解除した人: <@${interaction.user.id}>\n\n`+
-                `\`${Types.Commands.gban.ban.user}\` よりBANできます`
+                `\`${slashCommandsConfig.gban.ban.user}\` よりBANできます`
             )
-            .setFooter({ text: config.embed.footerText })
+            .setFooter({ text: embedConfig.footerText })
     
             interaction.reply({
                 embeds: [ embed ],
@@ -314,13 +316,13 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const result = await GBANManager.unBan(userId);
             if (!result) {
                 const embed = new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.warning)
-                .setTitle(config.emoji.warning + 'BANされていないユーザーです')
+                .setColor(embedConfig.colors.warning)
+                .setTitle(env.emoji.warning + 'BANされていないユーザーです')
                 .setDescription(
                     'このユーザーはグローバルBANされていません\n\n'+
-                    `\`${Types.Commands.gban.ban.userId}\` よりBANできます`
+                    `\`${slashCommandsConfig.gban.ban.userId}\` よりBANできます`
                 )
-                .setFooter({ text: config.embed.footerText })
+                .setFooter({ text: embedConfig.footerText })
         
                 interaction.reply({
                     embeds: [ embed ],
@@ -330,15 +332,15 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             }
 
             const embed = new Discord.EmbedBuilder()
-            .setColor(Types.embedCollar.success)
-            .setTitle(config.emoji.check + 'グローバルBANを解除しました！')
+            .setColor(embedConfig.colors.success)
+            .setTitle(env.emoji.check + 'グローバルBANを解除しました！')
             .setDescription(
                 'BOTを導入している全サーバーでBAN解除しました！\n'+
                 `BAN解除された人: <@${userId}> | \`${userId}\`\n`+
                 `BAN解除した人: <@${interaction.user.id}>\n\n`+
-                `\`${Types.Commands.gban.ban.userId}\` よりBANできます`
+                `\`${slashCommandsConfig.gban.ban.userId}\` よりBANできます`
             )
-            .setFooter({ text: config.embed.footerText })
+            .setFooter({ text: embedConfig.footerText })
 
             interaction.reply({
                 embeds: [ embed ],

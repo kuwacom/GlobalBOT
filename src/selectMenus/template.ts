@@ -1,13 +1,12 @@
-import { logger, config, client } from "../bot";
+import { DiscordSelectMenuInteraction } from "../types/discord";
 import { sleep } from "../utiles/utiles";
-import * as Types from "../types/types";
 import Discord from "discord.js";
 
 export const selectMenu = {
     customId: ["idone", "idsecond"]
 }
 
-export const executeInteraction = async (interaction: Types.DiscordSelectMenuInteraction) => {
+export const executeInteraction = async (interaction: DiscordSelectMenuInteraction) => {
     /**
      *  -- selectMenuの設定方法 --
      * 

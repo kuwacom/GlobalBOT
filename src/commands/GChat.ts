@@ -1,11 +1,14 @@
-import { logger, config, client } from "../bot";
+import { embedConfig, slashCommandsConfig } from "../config/discord";
+import env from "../config/env";
+import client from "../discord";
+import ButtonFormat from "../format/button";
+import EmbedFormat from "../format/embed";
+import ErrorFormat from "../format/error";
+import { DiscordCommandInteraction } from "../types/discord";
+import GChatManager from "../utiles/GChatManager";
+import DBManager from "../utiles/dbManager";
+import logger from "../utiles/logger";
 import { sleep, getMember, cacheUpdate, GChatConfRoleCheck } from "../utiles/utiles";
-import * as GChatManager from "../utiles/GChatManager";
-import * as FormatButton from "../format/button";
-import * as FormatEmbed from "../format/embed";
-import * as FormatERROR from "../format/error";
-import * as Types from "../types/types";
-import * as dbManager from "../utiles/dbManager";
 import Discord from "discord.js";
 
 export const command = {
@@ -141,14 +144,14 @@ export const executeMessage = async (message: Discord.Message) => {
 
 }
 
-export const executeInteraction = async (interaction: Types.DiscordCommandInteraction) => {
+export const executeInteraction = async (interaction: DiscordCommandInteraction) => {
     if (!interaction.guild || !interaction.channel || !interaction.member || !interaction.isChatInputCommand()) return;
     // interactionCommand
 
     // 権限チェック
     const member = await interaction.guild.members.fetch(interaction.user.id);
     if (interaction.user.id != interaction.guild.ownerId && !GChatConfRoleCheck(member.roles)) {
-        interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.gchat.editable));
+        interaction.reply(ErrorFormat.interaction.PermissionDenied(slashCommandsConfig.config.gchat.editable));
         return;
     }
 
@@ -156,8 +159,8 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
     const subCommand = interaction.options.getSubcommand();
 
     if (subcommandGroup == "ban") {
-        if (!config.adminIds.includes(interaction.user.id)) { // BOT運営かの権限チェック
-            interaction.reply(FormatERROR.interaction.SystemPermissionDenied());
+        if (!env.adminIds.includes(interaction.user.id)) { // BOT運営かの権限チェック
+            interaction.reply(ErrorFormat.interaction.SystemPermissionDenied());
             return;
         }
         const id = interaction.options.getString("id");
@@ -165,23 +168,23 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         if (subCommand == "user") {
             const reset = GChatManager.banUser(id);
             if (!reset) {
-                interaction.reply(FormatERROR.interaction.GChat.AlreadyBANedUser(Types.Commands.gchat.ban.user));
+                interaction.reply(ErrorFormat.interaction.GChat.AlreadyBANedUser(slashCommandsConfig.gchat.ban.user));
                 return;
             }
-            interaction.reply(FormatEmbed.interaction.GChat.DoneBANUser(Types.Commands.gchat.ban.user));
+            interaction.reply(EmbedFormat.interaction.GChat.DoneBANUser(slashCommandsConfig.gchat.ban.user));
             return;
         } else if (subCommand == "server") {
             const reset = GChatManager.banServer(id);
             if (!reset) {
-                interaction.reply(FormatERROR.interaction.GChat.AlreadyBANedServer(Types.Commands.gchat.ban.server));
+                interaction.reply(ErrorFormat.interaction.GChat.AlreadyBANedServer(slashCommandsConfig.gchat.ban.server));
                 return;
             }
-            interaction.reply(FormatEmbed.interaction.GChat.DoneBANServer(Types.Commands.gchat.ban.server));
+            interaction.reply(EmbedFormat.interaction.GChat.DoneBANServer(slashCommandsConfig.gchat.ban.server));
             return;
         }
     } else if (subcommandGroup == "unban") {
-        if (!config.adminIds.includes(interaction.user.id)) {
-            interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.editable));
+        if (!env.adminIds.includes(interaction.user.id)) {
+            interaction.reply(ErrorFormat.interaction.PermissionDenied(slashCommandsConfig.config.editable));
             return;
         }
         const id = interaction.options.getString("id");
@@ -189,18 +192,18 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         if (subCommand == "user") {
             const reset = GChatManager.unbanUser(id);
             if (!reset) {
-                interaction.reply(FormatERROR.interaction.GChat.NotBANedUser(Types.Commands.gchat.unban.user));
+                interaction.reply(ErrorFormat.interaction.GChat.NotBANedUser(slashCommandsConfig.gchat.unban.user));
                 return;
             }
-            interaction.reply(FormatEmbed.interaction.GChat.DoneUnBANUser(Types.Commands.gchat.unban.user));
+            interaction.reply(EmbedFormat.interaction.GChat.DoneUnBANUser(slashCommandsConfig.gchat.unban.user));
             return;
         } else if (subCommand == "server") {
             const reset = GChatManager.unbanServer(id);
             if (!reset) {
-                interaction.reply(FormatERROR.interaction.GChat.NotBANedServer(Types.Commands.gchat.unban.server));
+                interaction.reply(ErrorFormat.interaction.GChat.NotBANedServer(slashCommandsConfig.gchat.unban.server));
                 return;
             }
-            interaction.reply(FormatEmbed.interaction.GChat.DoneUnBANServer(Types.Commands.gchat.unban.server));
+            interaction.reply(EmbedFormat.interaction.GChat.DoneUnBANServer(slashCommandsConfig.gchat.unban.server));
             return;
         }
     }
@@ -210,8 +213,8 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         await cacheUpdate();
         
         const baseFields: Discord.APIEmbedField[] = 
-        (await Promise.all(Object.keys(dbManager.GChatDBs).map(async(channelId) => {
-            const GChatDB = dbManager.getGChatDB(channelId);
+        (await Promise.all(Object.keys(DBManager.GChatDBs).map(async(channelId) => {
+            const GChatDB = DBManager.getGChatDB(channelId);
             if (!GChatDB) return;
 
             const channel = await client.channels.fetch(channelId).catch((error) => {
@@ -220,7 +223,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             });
             if (channel?.type != Discord.ChannelType.GuildText) return; // これがないと型エラー
 
-            const serverDB = dbManager.getServerDB(channel.guild.id);
+            const serverDB = DBManager.getServerDB(channel.guild.id);
             if (!serverDB.GChat.enabled) return;
 
             const LinkDate = new Date(GChatDB.time);
@@ -234,28 +237,28 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             };
         }))).filter(e => e) as [];
 
-        const pageSlice = config.pageSlice.GChatList; // ページごとに表示する量
+        const pageSlice = env.pageSlice.GChatList; // ページごとに表示する量
         const betweenFields = baseFields.slice(0, pageSlice);
     
         let button = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
-            .addComponents(FormatButton.GBANBack(0, true))
-            .addComponents(FormatButton.GBANNext(1));
+            .addComponents(ButtonFormat.GBANBack(0, true))
+            .addComponents(ButtonFormat.GBANNext(1));
         if (0 == Math.ceil(baseFields.length / pageSlice) - 1) {
             button = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
-                .addComponents(FormatButton.GBANBack(0, true))
-                .addComponents(FormatButton.GBANNext(1, true));
+                .addComponents(ButtonFormat.GBANBack(0, true))
+                .addComponents(ButtonFormat.GBANNext(1, true));
         }
     
         const embeds = [
             new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.info)
+                .setColor(embedConfig.colors.info)
                 .setTitle(`-- GlobaChat List - 1/${Math.ceil(baseFields.length / pageSlice)} --`)
                 .setDescription("グローバルBANリスト")
                 .setDescription(
                     `**全 ${baseFields.length}個中  1~${pageSlice}個目**`
                 )
                 .setFields(betweenFields)
-                .setFooter({ text: config.embed.footerText })
+                .setFooter({ text: embedConfig.footerText })
         ];
         interaction.reply({ embeds: embeds, components: [ button ], ephemeral: true });
         return;
@@ -267,13 +270,13 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         const result = GChatManager.linkGchat(channel.id, interaction.user.id);
         if (!result) {
             const embed = new Discord.EmbedBuilder()
-            .setColor(Types.embedCollar.warning)
-            .setTitle(config.emoji.warning + 'すでに接続されています')
+            .setColor(embedConfig.colors.warning)
+            .setTitle(env.emoji.warning + 'すでに接続されています')
             .setDescription(
                 'このチャンネルはすでにグローバルチャットへ接続されています\n\n'+
-                `\`${Types.Commands.gchat.unlink}\` より切断できます`
+                `\`${slashCommandsConfig.gchat.unlink}\` より切断できます`
             )
-            .setFooter({ text: config.embed.footerText })
+            .setFooter({ text: embedConfig.footerText })
     
             interaction.reply({
                 embeds: [ embed ],
@@ -282,19 +285,19 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             return;
         }
 
-        const serverDB = dbManager.getServerDB(interaction.guild.id);
+        const serverDB = DBManager.getServerDB(interaction.guild.id);
         serverDB.GChat.enabled = true;
-        dbManager.saveServerDB(interaction.guild.id);
+        DBManager.saveServerDB(interaction.guild.id);
 
         const embed = new Discord.EmbedBuilder()
-        .setColor(Types.embedCollar.success)
-        .setTitle(config.emoji.check + '接続しました！')
+        .setColor(embedConfig.colors.success)
+        .setTitle(env.emoji.check + '接続しました！')
         .setDescription(
             `<#${channel.id}> をグローバルチャットへ接続しました！\n`+
             `接続をした人: <@${interaction.user.id}>\n\n`+
-            `\`${Types.Commands.gchat.unlink}\` より切断できます`
+            `\`${slashCommandsConfig.gchat.unlink}\` より切断できます`
         )
-        .setFooter({ text: config.embed.footerText })
+        .setFooter({ text: embedConfig.footerText })
 
         interaction.reply({
             embeds: [ embed ],
@@ -308,13 +311,13 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         const result = GChatManager.unLinkGchat(channel.id);
         if (!result) {
             const embed = new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.warning)
-                .setTitle(config.emoji.warning + '接続されていません')
+                .setColor(embedConfig.colors.warning)
+                .setTitle(env.emoji.warning + '接続されていません')
                 .setDescription(
                     'このチャンネルはすでにグローバルチャットへ接続されていないチャンネルです\n\n'+
-                    `\`${Types.Commands.gchat.link}\` より接続できます`
+                    `\`${slashCommandsConfig.gchat.link}\` より接続できます`
                 )
-                .setFooter({ text: config.embed.footerText })
+                .setFooter({ text: embedConfig.footerText })
     
             interaction.reply({
                 embeds: [ embed ],
@@ -323,19 +326,19 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             return;
         }
 
-        const serverDB = dbManager.getServerDB(interaction.guild.id);
+        const serverDB = DBManager.getServerDB(interaction.guild.id);
         serverDB.GChat.enabled = false;
-        dbManager.saveServerDB(interaction.guild.id);
+        DBManager.saveServerDB(interaction.guild.id);
 
         const embed = new Discord.EmbedBuilder()
-        .setColor(Types.embedCollar.success)
-        .setTitle(config.emoji.check + '切断しました！')
+        .setColor(embedConfig.colors.success)
+        .setTitle(env.emoji.check + '切断しました！')
         .setDescription(
             `<#${channel.id}> をグローバルチャットから切断しました！\n`+
             `接続をした人: <@${interaction.user.id}>\n\n`+
-            `\`${Types.Commands.gchat.link}\` より接続できます`
+            `\`${slashCommandsConfig.gchat.link}\` より接続できます`
         )
-        .setFooter({ text: config.embed.footerText })
+        .setFooter({ text: embedConfig.footerText })
 
         interaction.reply({
             embeds: [ embed ],

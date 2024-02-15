@@ -1,6 +1,4 @@
-import { logger, config, client } from "../bot";
-import { sleep, slashCommands } from "../utiles/utiles";
-import * as Types from "../types/types";
+import { DiscordCommandInteraction } from "../types/discord";
 import Discord from "discord.js";
 
 export const command = {
@@ -15,7 +13,7 @@ export const executeMessage = async (message: Discord.Message) => {
 
 }
 
-export const executeInteraction = async (interaction: Types.DiscordCommandInteraction) => {
+export const executeInteraction = async (interaction: DiscordCommandInteraction) => {
     if (!interaction.guild || !interaction.channel || !interaction.member || !interaction.isChatInputCommand()) return;
     // interactionCommand
 }

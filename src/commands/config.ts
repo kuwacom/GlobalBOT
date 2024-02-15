@@ -1,10 +1,11 @@
-import { logger, config, client } from "../bot";
+import { embedConfig, slashCommandsConfig } from "../config/discord";
+import env from "../config/env";
+import EmbedFormat from "../format/embed";
+import ErrorFormat from "../format/error";
+import { DiscordCommandInteraction } from "../types/discord";
+import DBManager from "../utiles/dbManager";
+import RoleManager from "../utiles/roleManager";
 import { sleep, serverConfRoleCheck, GBANConfRoleCheck, GChatConfRoleCheck } from "../utiles/utiles";
-import * as dbManager from "../utiles/dbManager";
-import * as roleManager from "../utiles/roleManager";
-import * as FormatERROR from "../format/error";
-import * as FormatEmbed from "../format/embed";
-import * as Types from "../types/types";
 import Discord from "discord.js";
 
 export const command = {
@@ -181,14 +182,14 @@ export const executeMessage = async (message: Discord.Message) => {
 
 }
 
-export const executeInteraction = async (interaction: Types.DiscordCommandInteraction) => {
+export const executeInteraction = async (interaction: DiscordCommandInteraction) => {
     if (!interaction.guild || !interaction.channel || !interaction.member || !interaction.isChatInputCommand()) return;
     // interactionCommand
 
     // 権限チェック
     const member = await interaction.guild.members.fetch(interaction.user.id);
     if (interaction.user.id != interaction.guild.ownerId && !serverConfRoleCheck(member.roles)) {
-        interaction.reply(FormatERROR.interaction.PermissionDenied(Types.Commands.config.editable));
+        interaction.reply(ErrorFormat.interaction.PermissionDenied(slashCommandsConfig.config.editable));
         return;
     }
 
@@ -199,32 +200,32 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const role = interaction.options.getRole("role");
             if (!role) return;
 
-            const result = roleManager.addConfigRole(role.id, interaction.guild.id);
+            const result = RoleManager.addConfigRole(role.id, interaction.guild.id);
             if (!result) {
-                interaction.reply(FormatERROR.interaction.AlreadyRegisteredRole(Types.Commands.config.editable));
+                interaction.reply(ErrorFormat.interaction.AlreadyRegisteredRole(slashCommandsConfig.config.editable));
                 return;
             }
             
-            interaction.reply(FormatEmbed.interaction.DoneRegisterRole(Types.Commands.config.editable))
+            interaction.reply(EmbedFormat.interaction.DoneRegisterRole(slashCommandsConfig.config.editable))
             return;
         } else if (subCommand == "remove") {
             const role = interaction.options.getRole("role");
             if (!role) return;
-            const result = roleManager.removeConfigRole(role.id, interaction.guild.id);
+            const result = RoleManager.removeConfigRole(role.id, interaction.guild.id);
             if (!result) {
-                interaction.reply(FormatERROR.interaction.NotRegisteredRole(Types.Commands.config.editable))
+                interaction.reply(ErrorFormat.interaction.NotRegisteredRole(slashCommandsConfig.config.editable))
             }
 
-            interaction.reply(FormatEmbed.interaction.DoneRemoveRole(Types.Commands.config.editable));
+            interaction.reply(EmbedFormat.interaction.DoneRemoveRole(slashCommandsConfig.config.editable));
             return;
         } else if (subCommand == "list") {
-            const roleIds = roleManager.getConfigRoles(interaction.guild.id);
+            const roleIds = RoleManager.getConfigRoles(interaction.guild.id);
             if (!roleIds) {
-                interaction.reply(FormatERROR.interaction.NotRegisteredRoles(Types.Commands.config.editable));
+                interaction.reply(ErrorFormat.interaction.NotRegisteredRoles(slashCommandsConfig.config.editable));
                 return;
             }
 
-            interaction.reply(FormatEmbed.interaction.RoleList(roleIds, Types.Commands.config.editable));
+            interaction.reply(EmbedFormat.interaction.RoleList(roleIds, slashCommandsConfig.config.editable));
             return;
         }
     } else if (subcommandGroup == "gban-editable") { // GBAN editable
@@ -232,32 +233,32 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const role = interaction.options.getRole("role");
             if (!role) return;
 
-            const result = roleManager.addGBANRole(role.id, interaction.guild.id);
+            const result = RoleManager.addGBANRole(role.id, interaction.guild.id);
             if (!result) {
-                interaction.reply(FormatERROR.interaction.AlreadyRegisteredRole(Types.Commands.config.gban.editable));
+                interaction.reply(ErrorFormat.interaction.AlreadyRegisteredRole(slashCommandsConfig.config.gban.editable));
                 return;
             }
             
-            interaction.reply(FormatEmbed.interaction.DoneRegisterRole(Types.Commands.config.gban.editable))
+            interaction.reply(EmbedFormat.interaction.DoneRegisterRole(slashCommandsConfig.config.gban.editable))
             return;
         } else if (subCommand == "remove") {
             const role = interaction.options.getRole("role");
             if (!role) return;
-            const result = roleManager.removeGBANRole(role.id, interaction.guild.id);
+            const result = RoleManager.removeGBANRole(role.id, interaction.guild.id);
             if (!result) {
-                interaction.reply(FormatERROR.interaction.NotRegisteredRole(Types.Commands.config.gban.editable))
+                interaction.reply(ErrorFormat.interaction.NotRegisteredRole(slashCommandsConfig.config.gban.editable))
             }
 
-            interaction.reply(FormatEmbed.interaction.DoneRemoveRole(Types.Commands.config.gban.editable));
+            interaction.reply(EmbedFormat.interaction.DoneRemoveRole(slashCommandsConfig.config.gban.editable));
             return;
         } else if (subCommand == "list") {
-            const roleIds = roleManager.getGBANRoles(interaction.guild.id);
+            const roleIds = RoleManager.getGBANRoles(interaction.guild.id);
             if (!roleIds) {
-                interaction.reply(FormatERROR.interaction.NotRegisteredRoles(Types.Commands.config.gban.editable));
+                interaction.reply(ErrorFormat.interaction.NotRegisteredRoles(slashCommandsConfig.config.gban.editable));
                 return;
             }
 
-            interaction.reply(FormatEmbed.interaction.RoleList(roleIds, Types.Commands.config.gban.editable));
+            interaction.reply(EmbedFormat.interaction.RoleList(roleIds, slashCommandsConfig.config.gban.editable));
             return;
         }
     } else if (subcommandGroup == "gchat-editable") { // GChat editable
@@ -265,32 +266,32 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             const role = interaction.options.getRole("role");
             if (!role) return;
 
-            const result = roleManager.addGChatRole(role.id, interaction.guild.id);
+            const result = RoleManager.addGChatRole(role.id, interaction.guild.id);
             if (!result) {
-                interaction.reply(FormatERROR.interaction.AlreadyRegisteredRole(Types.Commands.config.gchat.editable));
+                interaction.reply(ErrorFormat.interaction.AlreadyRegisteredRole(slashCommandsConfig.config.gchat.editable));
                 return;
             }
             
-            interaction.reply(FormatEmbed.interaction.DoneRegisterRole(Types.Commands.config.gchat.editable))
+            interaction.reply(EmbedFormat.interaction.DoneRegisterRole(slashCommandsConfig.config.gchat.editable))
             return;
         } else if (subCommand == "remove") {
             const role = interaction.options.getRole("role");
             if (!role) return;
-            const result = roleManager.removeGChatRole(role.id, interaction.guild.id);
+            const result = RoleManager.removeGChatRole(role.id, interaction.guild.id);
             if (!result) {
-                interaction.reply(FormatERROR.interaction.NotRegisteredRole(Types.Commands.config.gchat.editable))
+                interaction.reply(ErrorFormat.interaction.NotRegisteredRole(slashCommandsConfig.config.gchat.editable))
             }
 
-            interaction.reply(FormatEmbed.interaction.DoneRemoveRole(Types.Commands.config.gchat.editable));
+            interaction.reply(EmbedFormat.interaction.DoneRemoveRole(slashCommandsConfig.config.gchat.editable));
             return;
         } else if (subCommand == "list") {
-            const roleIds = roleManager.getGChatRoles(interaction.guild.id);
+            const roleIds = RoleManager.getGChatRoles(interaction.guild.id);
             if (!roleIds) {
-                interaction.reply(FormatERROR.interaction.NotRegisteredRoles(Types.Commands.config.gchat.editable));
+                interaction.reply(ErrorFormat.interaction.NotRegisteredRoles(slashCommandsConfig.config.gchat.editable));
                 return;
             }
 
-            interaction.reply(FormatEmbed.interaction.RoleList(roleIds, Types.Commands.config.gchat.editable));
+            interaction.reply(EmbedFormat.interaction.RoleList(roleIds, slashCommandsConfig.config.gchat.editable));
             return;
         }
     }
@@ -302,20 +303,20 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         if (subCommand == "enabled") {
             const switcBoolean = interaction.options.getBoolean("switch");
             if (switcBoolean == undefined) return;
-            const serverDB = dbManager.getServerDB(interaction.guild.id);
+            const serverDB = DBManager.getServerDB(interaction.guild.id);
     
             serverDB.GBAN.enabled = switcBoolean;
     
-            dbManager.saveServerDB(interaction.guild.id);
+            DBManager.saveServerDB(interaction.guild.id);
             
             const embed = new Discord.EmbedBuilder()
-            .setColor(Types.embedCollar.success)
-            .setTitle(config.emoji.check + '設定を変更しました！')
+            .setColor(embedConfig.colors.success)
+            .setTitle(env.emoji.check + '設定を変更しました！')
             .setDescription(
                 `グローバルBANを${switcBoolean?"有効":"無効"}にしました！\n\n`+
-                `\`${Types.Commands.config.gban.enabled}\` より設定を変更できます`
+                `\`${slashCommandsConfig.config.gban.enabled}\` より設定を変更できます`
             )
-            .setFooter({ text: config.embed.footerText })
+            .setFooter({ text: embedConfig.footerText })
     
             interaction.reply({
                 embeds: [ embed ],
@@ -327,20 +328,20 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         if (subCommand == "enabled") {
             const switcBoolean = interaction.options.getBoolean("switch");
             if (switcBoolean == undefined) return;
-            const serverDB = dbManager.getServerDB(interaction.guild.id);
+            const serverDB = DBManager.getServerDB(interaction.guild.id);
     
             serverDB.GChat.enabled = switcBoolean;
             
-            dbManager.saveServerDB(interaction.guild.id);
+            DBManager.saveServerDB(interaction.guild.id);
             
             const embed = new Discord.EmbedBuilder()
-            .setColor(Types.embedCollar.success)
-            .setTitle(config.emoji.check + '設定を変更しました！')
+            .setColor(embedConfig.colors.success)
+            .setTitle(env.emoji.check + '設定を変更しました！')
             .setDescription(
                 `グローバルチャットを${switcBoolean?"有効":"無効"}にしました！\n\n`+
-                `\`${Types.Commands.config.gchat.enabled}\` より設定を変更できます`
+                `\`${slashCommandsConfig.config.gchat.enabled}\` より設定を変更できます`
             )
-            .setFooter({ text: config.embed.footerText })
+            .setFooter({ text: embedConfig.footerText })
     
             interaction.reply({
                 embeds: [ embed ],

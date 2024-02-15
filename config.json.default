@@ -26,8 +26,9 @@
     },
     "path": {
         "serverDB": "./serverDB",
-        "GBANDB":"./GBANDB",
-        "GChatDB":"./GChatDB"
+        "GBANDB": "./GBANDB",
+        "GChatDB": "./GChatDB",
+        "botDB": "./botDB.json"
     },
     "cacheUpdateInterval": 1
 }

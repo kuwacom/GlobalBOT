@@ -1,116 +1,121 @@
-import { logger, config, client } from "../bot";
-import * as Types from "../types/types";
 import Discord from "discord.js";
+import { embedConfig } from "../config/discord";
+import env from "../config/env";
 
-// interaction
-export const interaction = {
-    DoneRegisterRole: (hintCommand: string): Discord.InteractionReplyOptions => {
-        return {
-            embeds: [
-                new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.success)
-                .setTitle(config.emoji.check+"登録しました！")
-                .setDescription(
-                    "ロールを登録しました！\n\n"+
-                    `\`${hintCommand}\`よりロールを設定可能です`
-                )
-                .setFooter({ text: config.embed.footerText })
-            ],
-            ephemeral: false
-        };
-    },
-    DoneRemoveRole: (hintCommand: string): Discord.InteractionReplyOptions => {
-        return {
-            embeds: [
-                new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.success)
-                .setTitle(config.emoji.check+"削除しました！")
-                .setDescription(
-                    "登録されているロールを削除しました！\n\n"+
-                    `\`${hintCommand}\`よりロールを設定可能です`
-                )
-                .setFooter({ text: config.embed.footerText })
-            ],
-            ephemeral: false
-        };
-    },
-    RoleList: (roleIds: string[], hintCommand: string): Discord.InteractionReplyOptions => {
-        return {
-            embeds: [
-                new Discord.EmbedBuilder()
-                .setColor(Types.embedCollar.success)
-                .setTitle(config.emoji.check+"登録されているロール")
-                .setDescription(
-                    roleIds.map(roleId => "<@&" + roleId + ">").join(" ")+
-                    "\n\n"+
-                    `\`${hintCommand}\`よりロールを設定可能です`
-                )
-                .setFooter({ text: config.embed.footerText })
-            ],
-            ephemeral: false
-        };
-    },
+namespace EmbedFormat {
 
-    GChat: {
-        DoneBANUser: (hintCommand: string): Discord.InteractionReplyOptions => {
+    // interaction
+    export const interaction = {
+        DoneRegisterRole: (hintCommand: string): Discord.InteractionReplyOptions => {
             return {
                 embeds: [
                     new Discord.EmbedBuilder()
-                    .setColor(Types.embedCollar.success)
-                    .setTitle(config.emoji.check+"BANしました！")
+                    .setColor(embedConfig.colors.success)
+                    .setTitle(env.emoji.check+"登録しました！")
                     .setDescription(
-                        "ユーザーをグローバルチャットからBANしました！\n\n"+
-                        `\`${hintCommand}\`より設定可能です`
+                        "ロールを登録しました！\n\n"+
+                        `\`${hintCommand}\`よりロールを設定可能です`
                     )
-                    .setFooter({ text: config.embed.footerText })
+                    .setFooter({ text: embedConfig.footerText })
                 ],
-                ephemeral: true
+                ephemeral: false
             };
         },
-        DoneUnBANUser: (hintCommand: string): Discord.InteractionReplyOptions => {
+        DoneRemoveRole: (hintCommand: string): Discord.InteractionReplyOptions => {
             return {
                 embeds: [
                     new Discord.EmbedBuilder()
-                    .setColor(Types.embedCollar.success)
-                    .setTitle(config.emoji.check+"BANを解除しました！")
+                    .setColor(embedConfig.colors.success)
+                    .setTitle(env.emoji.check+"削除しました！")
                     .setDescription(
-                        "ユーザーのBANを解除しました！\n\n"+
-                        `\`${hintCommand}\`より設定可能です`
+                        "登録されているロールを削除しました！\n\n"+
+                        `\`${hintCommand}\`よりロールを設定可能です`
                     )
-                    .setFooter({ text: config.embed.footerText })
+                    .setFooter({ text: embedConfig.footerText })
                 ],
-                ephemeral: true
+                ephemeral: false
             };
         },
-        DoneBANServer: (hintCommand: string): Discord.InteractionReplyOptions => {
+        RoleList: (roleIds: string[], hintCommand: string): Discord.InteractionReplyOptions => {
             return {
                 embeds: [
                     new Discord.EmbedBuilder()
-                    .setColor(Types.embedCollar.success)
-                    .setTitle(config.emoji.check+"BANしました！")
+                    .setColor(embedConfig.colors.success)
+                    .setTitle(env.emoji.check+"登録されているロール")
                     .setDescription(
-                        "サーバーをグローバルチャットからBANしました！\n\n"+
-                        `\`${hintCommand}\`より設定可能です`
+                        roleIds.map(roleId => "<@&" + roleId + ">").join(" ")+
+                        "\n\n"+
+                        `\`${hintCommand}\`よりロールを設定可能です`
                     )
-                    .setFooter({ text: config.embed.footerText })
+                    .setFooter({ text: embedConfig.footerText })
                 ],
-                ephemeral: true
+                ephemeral: false
             };
         },
-        DoneUnBANServer: (hintCommand: string): Discord.InteractionReplyOptions => {
-            return {
-                embeds: [
-                    new Discord.EmbedBuilder()
-                    .setColor(Types.embedCollar.success)
-                    .setTitle(config.emoji.check+"BANを解除しました！")
-                    .setDescription(
-                        "サーバーのBANを解除しました！\n\n"+
-                        `\`${hintCommand}\`より設定可能です`
-                    )
-                    .setFooter({ text: config.embed.footerText })
-                ],
-                ephemeral: true
-            };
+
+        GChat: {
+            DoneBANUser: (hintCommand: string): Discord.InteractionReplyOptions => {
+                return {
+                    embeds: [
+                        new Discord.EmbedBuilder()
+                        .setColor(embedConfig.colors.success)
+                        .setTitle(env.emoji.check+"BANしました！")
+                        .setDescription(
+                            "ユーザーをグローバルチャットからBANしました！\n\n"+
+                            `\`${hintCommand}\`より設定可能です`
+                        )
+                        .setFooter({ text: embedConfig.footerText })
+                    ],
+                    ephemeral: true
+                };
+            },
+            DoneUnBANUser: (hintCommand: string): Discord.InteractionReplyOptions => {
+                return {
+                    embeds: [
+                        new Discord.EmbedBuilder()
+                        .setColor(embedConfig.colors.success)
+                        .setTitle(env.emoji.check+"BANを解除しました！")
+                        .setDescription(
+                            "ユーザーのBANを解除しました！\n\n"+
+                            `\`${hintCommand}\`より設定可能です`
+                        )
+                        .setFooter({ text: embedConfig.footerText })
+                    ],
+                    ephemeral: true
+                };
+            },
+            DoneBANServer: (hintCommand: string): Discord.InteractionReplyOptions => {
+                return {
+                    embeds: [
+                        new Discord.EmbedBuilder()
+                        .setColor(embedConfig.colors.success)
+                        .setTitle(env.emoji.check+"BANしました！")
+                        .setDescription(
+                            "サーバーをグローバルチャットからBANしました！\n\n"+
+                            `\`${hintCommand}\`より設定可能です`
+                        )
+                        .setFooter({ text: embedConfig.footerText })
+                    ],
+                    ephemeral: true
+                };
+            },
+            DoneUnBANServer: (hintCommand: string): Discord.InteractionReplyOptions => {
+                return {
+                    embeds: [
+                        new Discord.EmbedBuilder()
+                        .setColor(embedConfig.colors.success)
+                        .setTitle(env.emoji.check+"BANを解除しました！")
+                        .setDescription(
+                            "サーバーのBANを解除しました！\n\n"+
+                            `\`${hintCommand}\`より設定可能です`
+                        )
+                        .setFooter({ text: embedConfig.footerText })
+                    ],
+                    ephemeral: true
+                };
+            }
         }
     }
 }
+
+export default EmbedFormat;
