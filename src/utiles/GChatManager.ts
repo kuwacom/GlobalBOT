@@ -1,6 +1,6 @@
 import Discord, { Attachment } from "discord.js";
 import { logger, config, client } from "../bot";
-import * as Types from "./types";
+import * as Types from "../types/types";
 import * as dbManager from "./dbManager";
 
 export const banUser = (userId: string): boolean => {

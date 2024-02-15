@@ -1,10 +1,10 @@
 import { logger, config, client } from "../bot";
-import { sleep, getMember, cacheUpdate, GBANConfRoleCheck } from "../modules/utiles";
-import * as GBANManager from "../modules/GBANManager";
+import { sleep, getMember, cacheUpdate, GBANConfRoleCheck } from "../utiles/utiles";
+import * as GBANManager from "../utiles/GBANManager";
 import * as FormatERROR from "../format/error";
 import * as FormatButton from "../format/button";
-import * as Types from "../modules/types";
-import * as dbManager from "../modules/dbManager";
+import * as Types from "../types/types";
+import * as dbManager from "../utiles/dbManager";
 import Discord from "discord.js";
 
 export const command = {

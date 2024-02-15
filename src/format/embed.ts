@@ -1,5 +1,5 @@
 import { logger, config, client } from "../bot";
-import * as Types from "../modules/types";
+import * as Types from "../types/types";
 import Discord from "discord.js";
 
 // interaction

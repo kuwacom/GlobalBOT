@@ -1,11 +1,11 @@
 import { logger, config, client } from "../bot";
-import { sleep, getMember, cacheUpdate, GChatConfRoleCheck } from "../modules/utiles";
-import * as GChatManager from "../modules/GChatManager";
+import { sleep, getMember, cacheUpdate, GChatConfRoleCheck } from "../utiles/utiles";
+import * as GChatManager from "../utiles/GChatManager";
 import * as FormatButton from "../format/button";
 import * as FormatEmbed from "../format/embed";
 import * as FormatERROR from "../format/error";
-import * as Types from "../modules/types";
-import * as dbManager from "../modules/dbManager";
+import * as Types from "../types/types";
+import * as dbManager from "../utiles/dbManager";
 import Discord from "discord.js";
 
 export const command = {

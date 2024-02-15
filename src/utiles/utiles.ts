@@ -1,7 +1,7 @@
 import { client, logger } from "../bot";
 import { executeInteraction } from "../buttons/GBANListNext-Back";
 import * as dbManager from "./dbManager";
-import * as Types from "./types";
+import * as Types from "../types/types";
 import Discord from "discord.js";
 
 export const slashCommands: Types.SlashCommand[] = [];

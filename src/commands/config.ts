@@ -1,10 +1,10 @@
 import { logger, config, client } from "../bot";
-import { sleep, serverConfRoleCheck, GBANConfRoleCheck, GChatConfRoleCheck } from "../modules/utiles";
-import * as dbManager from "../modules/dbManager";
-import * as roleManager from "../modules/roleManager";
+import { sleep, serverConfRoleCheck, GBANConfRoleCheck, GChatConfRoleCheck } from "../utiles/utiles";
+import * as dbManager from "../utiles/dbManager";
+import * as roleManager from "../utiles/roleManager";
 import * as FormatERROR from "../format/error";
 import * as FormatEmbed from "../format/embed";
-import * as Types from "../modules/types";
+import * as Types from "../types/types";
 import Discord from "discord.js";
 
 export const command = {

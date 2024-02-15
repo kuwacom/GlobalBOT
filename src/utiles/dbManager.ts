@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import * as Types from "./types";
+import * as Types from "../types/types";
 import fs from "fs";
 import path from "path";
 import { config, logger } from "../bot";

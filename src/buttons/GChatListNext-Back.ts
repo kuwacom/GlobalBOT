@@ -1,9 +1,9 @@
 import { logger, config, client } from "../bot";
-import { autoDeleteMessage, sec2HHMMSS, sleep, getMember, cacheUpdate } from "../modules/utiles";
-import * as Types from "../modules/types";
+import { autoDeleteMessage, sec2HHMMSS, sleep, getMember, cacheUpdate } from "../utiles/utiles";
+import * as Types from "../types/types";
 import * as FormatERROR from "../format/error";
 import * as FormatButton from "../format/button";
-import * as dbManager from "../modules/dbManager";
+import * as dbManager from "../utiles/dbManager";
 import Discord from "discord.js";
 
 export const button = {

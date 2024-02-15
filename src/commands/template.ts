@@ -1,6 +1,6 @@
 import { logger, config, client } from "../bot";
-import { sleep, slashCommands } from "../modules/utiles";
-import * as Types from "../modules/types";
+import { sleep, slashCommands } from "../utiles/utiles";
+import * as Types from "../types/types";
 import Discord from "discord.js";
 
 export const command = {

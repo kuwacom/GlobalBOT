@@ -2,27 +2,14 @@ import Discord from "discord.js";
 // @ts-ignore
 import config from "../config.json";
 import fs from "fs";
-import { autoDeleteMessage, slashCommands, commands, buttons, selectMenus, modals, sleep, sec2HHMMSS, randRange, cacheUpdate } from "./modules/utiles"
-import { Logger } from 'tslog'
-import * as Types from "./modules/types";
-import * as GBANManager from "./modules/GBANManager";
-import * as GChatManager from "./modules/GChatManager";
+import { autoDeleteMessage, slashCommands, commands, buttons, selectMenus, modals, sleep, sec2HHMMSS, randRange, cacheUpdate } from "./utiles/utiles"
+import * as Types from "./types/types";
+import * as GBANManager from "./utiles/GBANManager";
+import * as GChatManager from "./utiles/GChatManager";
 import * as FormatERROR from "./format/error";
-import * as dbManager from "./modules/dbManager";
-
-const logger = new Logger();
-const client = new Discord.Client({
-    intents: [
-        Discord.GatewayIntentBits.Guilds,
-        Discord.GatewayIntentBits.GuildMessages,
-        Discord.GatewayIntentBits.MessageContent,
-        Discord.GatewayIntentBits.GuildVoiceStates,
-        Discord.GatewayIntentBits.GuildMessageReactions,
-        Discord.GatewayIntentBits.DirectMessageReactions,
-        Discord.GatewayIntentBits.GuildEmojisAndStickers
-    ],
-    // ws: { properties: { browser: "Discord iOS" } } 
-});
+import * as dbManager from "./utiles/dbManager";
+import client from "./discord";
+import logger from "./utiles/logger";
 
 // エラーハンドリング
 process.on("uncaughtException", (err) => {
