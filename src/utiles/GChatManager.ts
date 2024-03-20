@@ -2,6 +2,7 @@ import Discord from "discord.js";
 import DBManager from "./dbManager";
 import { embedConfig } from "../config/discord";
 import client from "../discord";
+import { checkBadWord } from "./badword";
 
 namespace GChatManager {
     
@@ -56,6 +57,7 @@ namespace GChatManager {
 
     export const broadcastMessage = async (message: Discord.Message) => {
         message.delete();
+        if (checkBadWord(message.content) != null) return;
         client.guilds.cache.forEach((guild) => {
             const serverDB = DBManager.getServerDB(guild.id);
             if (!serverDB.GChat.enabled) return;

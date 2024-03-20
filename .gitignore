@@ -4,9 +4,7 @@ dist/
 config.json
 
 # DBs
-GBANDB/*
-GBANDB/GBANDB.txt
-GChatDB/*
-GChatDB/GChatDB.txt
-serverDB/*
-serverDB/serverDB.txt
+GBANDB/
+GChatDB/
+serverDB/
+botDB.json

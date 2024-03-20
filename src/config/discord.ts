@@ -26,6 +26,10 @@ export const slashCommandsConfig = {
     gchat: {
         link: "/gchat link",
         unlink: "/gchat link",
+        badWord: {
+            add: '/gchat badword add',
+            remove: '/gchat badword remove'
+        },
         ban: {
             user: "/gchat ban user",
             server: "/gchat ban server"

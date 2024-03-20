@@ -164,6 +164,24 @@ namespace ErrorFormat {
 
     // message
     export const message = {
+
+        GChat: {
+            ContainsBadWord: {
+                embeds: [
+                    new Discord.EmbedBuilder()
+                    .setColor(embedConfig.colors.warning)
+                    .setTitle(env.emoji.warning+"エラー")
+                    .setDescription(
+                        "禁止用語が含まれています！"
+                    )
+                    .setFooter({ text: embedConfig.footerText })
+                ],
+                allowedMentions: {
+                    repliedUser: true
+                }
+            } as Discord.MessageReplyOptions,
+        },
+
         // textCommandに対応してないとき
         NotSupportTextCommand: {
             embeds: [
