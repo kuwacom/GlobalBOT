@@ -83,7 +83,6 @@ namespace DBManager {
                     // @ts-ignore
                     botDB[key] = botDB_[key];
                 }
-                console.log(botDB)
                 logger.info("load BOTDB Done");
             } catch (error) {
                 saveBotDB();
