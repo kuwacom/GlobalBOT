@@ -28,7 +28,7 @@ namespace DBManager {
 
     export const initialize = async(): Promise<void> => {
         fs.readdir(serverDBPath, (error, files) => { // serverDB
-            if (error) logger.error("dbManager-serverDB" + error);
+            if (error) return logger.error("dbManager-serverDB" + error);
             files.filter((file) => {
                 return path.extname(file).toLowerCase() == '.json';
             }).forEach(async (dir: any) => {
@@ -44,7 +44,7 @@ namespace DBManager {
         });
 
         fs.readdir(GBANDBPath, (error, files) => { // GBAN DB
-            if (error) logger.error("dbManager-GBANDB" + error);
+            if (error) return logger.error("dbManager-GBANDB" + error);
             files.filter((file) => {
                 return path.extname(file).toLowerCase() == '.json';
             }).forEach(async (dir: any) => {
@@ -60,7 +60,7 @@ namespace DBManager {
         });
 
         fs.readdir(GChatDBPath, (error, files) => { // GChat DB
-            if (error) logger.error("dbManager-GChatDB" + error);
+            if (error) return logger.error("dbManager-GChatDB" + error);
             files.filter((file) => {
                 return path.extname(file).toLowerCase() == '.json';
             }).forEach(async (dir: any) => {
