@@ -6,136 +6,108 @@ import EmbedFormat from "../format/embed";
 import ErrorFormat from "../format/error";
 import { DiscordCommandInteraction } from "../types/discord";
 import GChatManager from "../utiles/GChatManager";
+import { addGChatBadWord, removeGChatBadWord } from "../utiles/badword";
 import DBManager from "../utiles/dbManager";
 import logger from "../utiles/logger";
 import { sleep, getMember, cacheUpdate, GChatConfRoleCheck } from "../utiles/utiles";
-import Discord from "discord.js";
+import Discord, { SlashCommandBuilder } from "discord.js";
 
-export const command = {
-    name: "gchat",
-    description: "グローバルチャット",
-    options: [
-        {
-            name: "list",
-            description: "グローバルチャット接続リスト",
-            type: 1,
-        },
-        {
-            name: "link",
-            description: "指定したチャンネルをグローバルチャットへ接続します",
-            type: 1,
-            options: [
-                {
-                    name: "channel",
-                    description: "接続するチャンネル",
-                    required: false,
-                    type: 7,
-                    channel_type: [
-                        0, 2
-                    ]
-                }
-            ]
-        },
-        {
-            name: "unlink",
-            description: "指定したチャンネルをグローバルチャットから切断します",
-            type: 1,
-            options: [
-                {
-                    name: "channel",
-                    description: "接続するチャンネル",
-                    required: false,
-                    type: 7,
-                    channel_type: [
-                        0, 2
-                    ]
-                }
-            ]
-        },
-        {
-            name: "banuser",
-            description: "指定したユーザーをグローバルチャットからBANします",
-            type: 1,
-            options: [
-                {
-                    name: "id",
-                    description: "BANするユーザーID",
-                    required: true,
-                    type: 7,
-                    channel_type: [
-                        0, 2
-                    ]
-                }
-            ]
-        },
-        {
-            name: "ban",
-            description: "指定したユーザーおよびサーバーをグローバルチャットからBANします",
-            type: 2,
-            options: [
-                {
-                    name: "user",
-                    description: "指定したユーザーをグローバルチャットからBANします",
-                    type: 1,
-                    options: [
-                        {
-                            name: "id",
-                            description: "BANするユーザーID",
-                            required: true,
-                            type: 3
-                        }
-                    ]
-                },
-                {
-                    name: "server",
-                    description: "指定したサーバーをグローバルチャットからBANします",
-                    type: 1,
-                    options: [
-                        {
-                            name: "id",
-                            description: "BANするサーバーID",
-                            required: true,
-                            type: 3
-                        }
-                    ]
-                },
-            ]
-        },
-        {
-            name: "unban",
-            description: "指定したユーザーおよびサーバーをグローバルチャットのBANを解除します",
-            type: 2,
-            options: [
-                {
-                    name: "user",
-                    description: "指定したユーザーをグローバルチャットのBANを解除します",
-                    type: 1,
-                    options: [
-                        {
-                            name: "id",
-                            description: "解除するユーザーID",
-                            required: true,
-                            type: 3
-                        }
-                    ]
-                },
-                {
-                    name: "server",
-                    description: "指定したサーバーをグローバルチャットのBANを解除します",
-                    type: 1,
-                    options: [
-                        {
-                            name: "id",
-                            description: "解除するサーバーID",
-                            required: true,
-                            type: 3
-                        }
-                    ]
-                },
-            ]
-        }
-    ]
-}
+export const command = new SlashCommandBuilder()
+    .setName('gchat')
+    .setDescription('グローバルチャット')
+    .addSubcommand(subCommand => subCommand
+        .setName('list')
+        .setDescription('グローバルチャット接続リスト')
+    ).addSubcommand(subCommand => subCommand
+        .setName('link')
+        .setDescription('指定したチャンネルをグローバルチャットへ接続します')
+        .addChannelOption(option => option
+            .setName('channel')
+            .setDescription('接続するチャンネル')
+            .setRequired(false)
+            .addChannelTypes(
+                Discord.ChannelType.GuildText,
+                Discord.ChannelType.GuildVoice
+            )
+        )
+    ).addSubcommand(subCommand => subCommand
+        .setName('unlink')
+        .setDescription('指定したチャンネルをグローバルチャットから切断します')
+        .addChannelOption(option => option
+            .setName('channel')
+            .setDescription('切断するチャンネル')
+            .setRequired(false)
+            .addChannelTypes(
+                Discord.ChannelType.GuildText,
+                Discord.ChannelType.GuildVoice
+            )
+        )
+    )
+    
+
+    .addSubcommandGroup(subCommandGroup => subCommandGroup
+        .setName('badword')
+        .setDescription('禁止ワードを設定します')
+        .addSubcommand(subCommand => subCommand
+            .setName('add')
+            .setDescription('禁止ワードを登録します')
+            .addStringOption(option => option
+                .setName('text')
+                .setDescription('登録する文字')
+                .setRequired(true)
+            )
+        ).addSubcommand(subCommand => subCommand
+            .setName('remove')
+            .setDescription('禁止ワードを削除します')
+            .addStringOption(option => option
+                .setName('text')
+                .setDescription('削除する文字')
+                .setRequired(true)
+            )
+        )
+    )
+
+    .addSubcommandGroup(subCommandGroup => subCommandGroup
+        .setName('ban')
+        .setDescription('指定したユーザーおよびサーバーをグローバルチャットからBANします')
+        .addSubcommand(subCommand => subCommand
+            .setName('user')
+            .setDescription('指定したユーザーをグローバルチャットからBANします')
+            .addStringOption(option => option
+                .setName('id')
+                .setDescription('BANするユーザーID')
+                .setRequired(true)
+            )
+        ).addSubcommand(subCommand => subCommand
+            .setName('server')
+            .setDescription('指定したサーバーをグローバルチャットからBANします')
+            .addStringOption(option => option
+                .setName('id')
+                .setDescription('BANするサーバーID')
+                .setRequired(true)
+            )
+        )
+    ).addSubcommandGroup(subCommandGroup => subCommandGroup
+        .setName('unban')
+        .setDescription('指定したユーザーおよびサーバーをグローバルチャットのBANを解除します')
+        .addSubcommand(subCommand => subCommand
+            .setName('user')
+            .setDescription('指定したユーザーをグローバルチャットのBANを解除します')
+            .addStringOption(option => option
+                .setName('id')
+                .setDescription('解除するユーザーID')
+                .setRequired(true)
+            )
+        ).addSubcommand(subCommand => subCommand
+            .setName('server')
+            .setDescription('指定したサーバーをグローバルチャットからBANします')
+            .addStringOption(option => option
+                .setName('id')
+                .setDescription('解除するサーバーID')
+                .setRequired(true)
+            )
+        )
+    )
 
 
 export const executeMessage = async (message: Discord.Message) => {
@@ -158,6 +130,82 @@ export const executeInteraction = async (interaction: DiscordCommandInteraction)
     const subcommandGroup = interaction.options.getSubcommandGroup();
     const subCommand = interaction.options.getSubcommand();
 
+    if (subcommandGroup == 'badword') {
+        if (!env.adminIds.includes(interaction.user.id)) { // BOT運営かの権限チェック
+            interaction.reply(ErrorFormat.interaction.SystemPermissionDenied());
+            return;
+        }
+
+        const text = interaction.options.getString('text');
+        if (!text) return;
+
+        if (subCommand == 'add') {
+            if (!addGChatBadWord(text)) {
+                const embed = new Discord.EmbedBuilder()
+                .setColor(embedConfig.colors.warning)
+                .setTitle(env.emoji.warning + '既に登録されています')
+                .setDescription(
+                    'この禁止ワードはすでに登録されています\n\n'+
+                    `\`${slashCommandsConfig.gchat.badWord.remove}\` より削除できます`
+                )
+                .setFooter({ text: embedConfig.footerText })
+        
+                interaction.reply({
+                    embeds: [ embed ],
+                    ephemeral: true
+                });
+                return;
+            }
+
+            const embed = new Discord.EmbedBuilder()
+            .setColor(embedConfig.colors.success)
+            .setTitle(env.emoji.check + '登録しました！')
+            .setDescription(
+                `\`${text}\` を禁止ワードへ登録しました！\n`+
+                `\`${slashCommandsConfig.gchat.badWord.remove}\` より削除できます`
+            )
+            .setFooter({ text: embedConfig.footerText })
+    
+            interaction.reply({
+                embeds: [ embed ],
+                ephemeral: false
+            });
+            return;
+        } else if (subCommand == 'remove') {
+            if (!removeGChatBadWord(text)) {
+                const embed = new Discord.EmbedBuilder()
+                .setColor(embedConfig.colors.warning)
+                .setTitle(env.emoji.warning + '登録されていません')
+                .setDescription(
+                    'この文字は禁止ワードへ登録されていません\n'+
+                    `\`${slashCommandsConfig.gchat.badWord.add}\` より登録できます`
+                )
+                .setFooter({ text: embedConfig.footerText })
+        
+                interaction.reply({
+                    embeds: [ embed ],
+                    ephemeral: true
+                });
+                return;
+            }
+
+            const embed = new Discord.EmbedBuilder()
+            .setColor(embedConfig.colors.success)
+            .setTitle(env.emoji.check + '削除しました！')
+            .setDescription(
+                `\`${text}\` を禁止ワードから削除しました！\n`+
+                `\`${slashCommandsConfig.gchat.badWord.remove}\` より登録できます`
+            )
+            .setFooter({ text: embedConfig.footerText })
+    
+            interaction.reply({
+                embeds: [ embed ],
+                ephemeral: false
+            });
+            return;
+        }
+    } else
+    
     if (subcommandGroup == "ban") {
         if (!env.adminIds.includes(interaction.user.id)) { // BOT運営かの権限チェック
             interaction.reply(ErrorFormat.interaction.SystemPermissionDenied());
