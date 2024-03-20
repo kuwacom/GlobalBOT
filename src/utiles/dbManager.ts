@@ -11,6 +11,9 @@ namespace DBManager {
         GChatBAN: {
             users: [] as string[],
             servers: [] as string[]
+        },
+        GChat: {
+            badWord: [] as string[]
         }
     };
     export const serverDBs: { [serverId: string]: ServerDB} = {};
@@ -71,9 +74,14 @@ namespace DBManager {
             logger.info("load BOTDB");
             try {
                 const botDB_ = JSON.parse(fs.readFileSync(env.path.botDB).toString());
-                botDB.GChatBAN = botDB_.GChatBAN;
-            logger.info("load BOTDB Done");
+                for (const key in botDB_) {
+                    // @ts-ignore
+                    botDB[key] = botDB_[key];
+                }
+                console.log(botDB)
+                logger.info("load BOTDB Done");
             } catch (error) {
+                saveBotDB();
                 logger.error("ERROR BOTDB");
             }
         }

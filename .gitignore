@@ -10,3 +10,4 @@ GChatDB/*
 GChatDB/GChatDB.txt
 serverDB/*
 serverDB/serverDB.txt
+botDB.json
