@@ -24,7 +24,7 @@
             "error": "#ff0000"
         }
     },
-    "path": {
+    "db": {
         "serverDB": "./serverDB",
         "GBANDB": "./GBANDB",
         "GChatDB": "./GChatDB",
